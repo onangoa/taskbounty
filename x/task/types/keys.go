@@ -17,3 +17,8 @@ const (
 
 // ParamsKey is the prefix to retrieve all Params
 var ParamsKey = collections.NewPrefix("p_task")
+
+var (
+	TaskKey      = collections.NewPrefix("task/value/")
+	TaskCountKey = collections.NewPrefix("task/count/")
+)

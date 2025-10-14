@@ -1,4 +1,5 @@
 syntax = "proto3";
+
 package taskbounty.task.v1;
 
 import "amino/amino.proto";
@@ -6,6 +7,7 @@ import "cosmos/base/query/v1beta1/pagination.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "taskbounty/task/v1/params.proto";
+import "taskbounty/task/v1/task.proto";
 
 option go_package = "taskbounty/x/task/types";
 
@@ -14,6 +16,16 @@ service Query {
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/taskbounty/task/v1/params";
+  }
+
+  // ListTask Queries a list of Task items.
+  rpc GetTask(QueryGetTaskRequest) returns (QueryGetTaskResponse) {
+    option (google.api.http).get = "/taskbounty/task/v1/task/{id}";
+  }
+
+  // ListTask defines the ListTask RPC.
+  rpc ListTask(QueryAllTaskRequest) returns (QueryAllTaskResponse) {
+    option (google.api.http).get = "/taskbounty/task/v1/task";
   }
 }
 
@@ -27,4 +39,25 @@ message QueryParamsResponse {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+}
+
+// QueryGetTaskRequest defines the QueryGetTaskRequest message.
+message QueryGetTaskRequest {
+  uint64 id = 1;
+}
+
+// QueryGetTaskResponse defines the QueryGetTaskResponse message.
+message QueryGetTaskResponse {
+  Task task = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryAllTaskRequest defines the QueryAllTaskRequest message.
+message QueryAllTaskRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryAllTaskResponse defines the QueryAllTaskResponse message.
+message QueryAllTaskResponse {
+  repeated Task task = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

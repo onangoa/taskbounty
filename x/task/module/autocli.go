@@ -17,6 +17,18 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Use:       "params",
 					Short:     "Shows the parameters of the module",
 				},
+				{
+					RpcMethod: "ListTask",
+					Use:       "list-task",
+					Short:     "List all task",
+				},
+				{
+					RpcMethod:      "GetTask",
+					Use:            "get-task [id]",
+					Short:          "Gets a task by id",
+					Alias:          []string{"show-task"},
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "id"}},
+				},
 				// this line is used by ignite scaffolding # autocli/query
 			},
 		},
@@ -27,6 +39,24 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				{
 					RpcMethod: "UpdateParams",
 					Skip:      true, // skipped because authority gated
+				},
+				{
+					RpcMethod:      "CreateTask",
+					Use:            "create-task [title] [description] [bounty] [status] [claimant] [proof] [approver]",
+					Short:          "Create task",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "title"}, {ProtoField: "description"}, {ProtoField: "bounty"}, {ProtoField: "status"}, {ProtoField: "claimant"}, {ProtoField: "proof"}, {ProtoField: "approver"}},
+				},
+				{
+					RpcMethod:      "UpdateTask",
+					Use:            "update-task [id] [title] [description] [bounty] [status] [claimant] [proof] [approver]",
+					Short:          "Update task",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "id"}, {ProtoField: "title"}, {ProtoField: "description"}, {ProtoField: "bounty"}, {ProtoField: "status"}, {ProtoField: "claimant"}, {ProtoField: "proof"}, {ProtoField: "approver"}},
+				},
+				{
+					RpcMethod:      "DeleteTask",
+					Use:            "delete-task [id]",
+					Short:          "Delete task",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "id"}},
 				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},

@@ -1,7 +1,9 @@
 syntax = "proto3";
+
 package taskbounty.task.v1;
 
 import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
 import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
@@ -16,6 +18,15 @@ service Msg {
   // UpdateParams defines a (governance) operation for updating the module
   // parameters. The authority defaults to the x/gov module account.
   rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+
+  // CreateTask defines the CreateTask RPC.
+  rpc CreateTask(MsgCreateTask) returns (MsgCreateTaskResponse);
+
+  // UpdateTask defines the UpdateTask RPC.
+  rpc UpdateTask(MsgUpdateTask) returns (MsgUpdateTaskResponse);
+
+  // DeleteTask defines the DeleteTask RPC.
+  rpc DeleteTask(MsgDeleteTask) returns (MsgDeleteTaskResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -27,7 +38,7 @@ message MsgUpdateParams {
   string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 
   // params defines the module parameters to update.
-  //
+
   // NOTE: All parameters must be supplied.
   Params params = 2 [
     (gogoproto.nullable) = false,
@@ -38,3 +49,48 @@ message MsgUpdateParams {
 // MsgUpdateParamsResponse defines the response structure for executing a
 // MsgUpdateParams message.
 message MsgUpdateParamsResponse {}
+
+// MsgCreateTask defines the MsgCreateTask message.
+message MsgCreateTask {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string title = 2;
+  string description = 3;
+  cosmos.base.v1beta1.Coin bounty = 4 [(gogoproto.nullable) = false];
+  int64 status = 5;
+  string claimant = 6;
+  string proof = 7;
+  string approver = 8;
+}
+
+// MsgCreateTaskResponse defines the MsgCreateTaskResponse message.
+message MsgCreateTaskResponse {
+  uint64 id = 1;
+}
+
+// MsgUpdateTask defines the MsgUpdateTask message.
+message MsgUpdateTask {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 2;
+  string title = 3;
+  string description = 4;
+  cosmos.base.v1beta1.Coin bounty = 5 [(gogoproto.nullable) = false];
+  int64 status = 6;
+  string claimant = 7;
+  string proof = 8;
+  string approver = 9;
+}
+
+// MsgUpdateTaskResponse defines the MsgUpdateTaskResponse message.
+message MsgUpdateTaskResponse {}
+
+// MsgDeleteTask defines the MsgDeleteTask message.
+message MsgDeleteTask {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 2;
+}
+
+// MsgDeleteTaskResponse defines the MsgDeleteTaskResponse message.
+message MsgDeleteTaskResponse {}

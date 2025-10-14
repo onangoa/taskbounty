@@ -1,9 +1,11 @@
 syntax = "proto3";
+
 package taskbounty.task.v1;
 
 import "amino/amino.proto";
 import "gogoproto/gogo.proto";
 import "taskbounty/task/v1/params.proto";
+import "taskbounty/task/v1/task.proto";
 
 option go_package = "taskbounty/x/task/types";
 
@@ -14,4 +16,6 @@ message GenesisState {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+  repeated Task task_list = 2 [(gogoproto.nullable) = false];
+  uint64 task_count = 3;
 }
