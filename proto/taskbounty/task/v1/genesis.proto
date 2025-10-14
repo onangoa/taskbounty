@@ -1,0 +1,17 @@
+syntax = "proto3";
+package taskbounty.task.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "taskbounty/task/v1/params.proto";
+
+option go_package = "taskbounty/x/task/types";
+
+// GenesisState defines the task module's genesis state.
+message GenesisState {
+  // params defines all the parameters of the module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
