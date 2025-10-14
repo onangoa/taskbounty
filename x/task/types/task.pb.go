@@ -5,13 +5,12 @@ package types
 
 import (
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-
 	types "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	proto "github.com/cosmos/gogoproto/proto"
+	io "io"
+	math "math"
+	math_bits "math/bits"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -25,17 +24,60 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// Task defines the Task message.
+// TaskStatus enum
+type TaskStatus int32
+
+const (
+	TASK_STATUS_UNDEFINED TaskStatus = 0
+	TASK_STATUS_OPEN      TaskStatus = 1
+	TASK_STATUS_CLAIMED   TaskStatus = 2
+	TASK_STATUS_SUBMITTED TaskStatus = 3
+	TASK_STATUS_APPROVED  TaskStatus = 4
+	TASK_STATUS_REJECTED  TaskStatus = 5
+	TASK_STATUS_CLOSED    TaskStatus = 6
+)
+
+var TaskStatus_name = map[int32]string{
+	0: "TASK_STATUS_UNDEFINED",
+	1: "TASK_STATUS_OPEN",
+	2: "TASK_STATUS_CLAIMED",
+	3: "TASK_STATUS_SUBMITTED",
+	4: "TASK_STATUS_APPROVED",
+	5: "TASK_STATUS_REJECTED",
+	6: "TASK_STATUS_CLOSED",
+}
+
+var TaskStatus_value = map[string]int32{
+	"TASK_STATUS_UNDEFINED": 0,
+	"TASK_STATUS_OPEN":      1,
+	"TASK_STATUS_CLAIMED":   2,
+	"TASK_STATUS_SUBMITTED": 3,
+	"TASK_STATUS_APPROVED":  4,
+	"TASK_STATUS_REJECTED":  5,
+	"TASK_STATUS_CLOSED":    6,
+}
+
+func (x TaskStatus) String() string {
+	return proto.EnumName(TaskStatus_name, int32(x))
+}
+
+func (TaskStatus) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_55df38726042d56c, []int{0}
+}
+
+// Task message.
 type Task struct {
 	Id          uint64     `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Title       string     `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Description string     `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	Bounty      types.Coin `protobuf:"bytes,4,opt,name=bounty,proto3" json:"bounty"`
-	Status      int64      `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`
+	Status      TaskStatus `protobuf:"varint,5,opt,name=status,proto3,enum=taskbounty.task.v1.TaskStatus" json:"status,omitempty"`
 	Claimant    string     `protobuf:"bytes,6,opt,name=claimant,proto3" json:"claimant,omitempty"`
 	Proof       string     `protobuf:"bytes,7,opt,name=proof,proto3" json:"proof,omitempty"`
 	Approver    string     `protobuf:"bytes,8,opt,name=approver,proto3" json:"approver,omitempty"`
 	Creator     string     `protobuf:"bytes,9,opt,name=creator,proto3" json:"creator,omitempty"`
+	CreatedAt   int64      `protobuf:"varint,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt   int64      `protobuf:"varint,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 }
 
 func (m *Task) Reset()         { *m = Task{} }
@@ -99,11 +141,11 @@ func (m *Task) GetBounty() types.Coin {
 	return types.Coin{}
 }
 
-func (m *Task) GetStatus() int64 {
+func (m *Task) GetStatus() TaskStatus {
 	if m != nil {
 		return m.Status
 	}
-	return 0
+	return TASK_STATUS_UNDEFINED
 }
 
 func (m *Task) GetClaimant() string {
@@ -134,34 +176,416 @@ func (m *Task) GetCreator() string {
 	return ""
 }
 
+func (m *Task) GetCreatedAt() int64 {
+	if m != nil {
+		return m.CreatedAt
+	}
+	return 0
+}
+
+func (m *Task) GetUpdatedAt() int64 {
+	if m != nil {
+		return m.UpdatedAt
+	}
+	return 0
+}
+
+// proof of task completion
+type TaskProof struct {
+	Hash      string `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash,omitempty"`
+	Type      string `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	Timestamp int64  `protobuf:"varint,3,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Data      string `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`
+}
+
+func (m *TaskProof) Reset()         { *m = TaskProof{} }
+func (m *TaskProof) String() string { return proto.CompactTextString(m) }
+func (*TaskProof) ProtoMessage()    {}
+func (*TaskProof) Descriptor() ([]byte, []int) {
+	return fileDescriptor_55df38726042d56c, []int{1}
+}
+func (m *TaskProof) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *TaskProof) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_TaskProof.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *TaskProof) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TaskProof.Merge(m, src)
+}
+func (m *TaskProof) XXX_Size() int {
+	return m.Size()
+}
+func (m *TaskProof) XXX_DiscardUnknown() {
+	xxx_messageInfo_TaskProof.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TaskProof proto.InternalMessageInfo
+
+func (m *TaskProof) GetHash() string {
+	if m != nil {
+		return m.Hash
+	}
+	return ""
+}
+
+func (m *TaskProof) GetType() string {
+	if m != nil {
+		return m.Type
+	}
+	return ""
+}
+
+func (m *TaskProof) GetTimestamp() int64 {
+	if m != nil {
+		return m.Timestamp
+	}
+	return 0
+}
+
+func (m *TaskProof) GetData() string {
+	if m != nil {
+		return m.Data
+	}
+	return ""
+}
+
+// reward distribution for completed tasks
+type TaskReward struct {
+	TaskId    uint64     `protobuf:"varint,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	Claimant  string     `protobuf:"bytes,2,opt,name=claimant,proto3" json:"claimant,omitempty"`
+	Amount    types.Coin `protobuf:"bytes,3,opt,name=amount,proto3" json:"amount"`
+	Timestamp int64      `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	TxHash    string     `protobuf:"bytes,5,opt,name=tx_hash,json=txHash,proto3" json:"tx_hash,omitempty"`
+}
+
+func (m *TaskReward) Reset()         { *m = TaskReward{} }
+func (m *TaskReward) String() string { return proto.CompactTextString(m) }
+func (*TaskReward) ProtoMessage()    {}
+func (*TaskReward) Descriptor() ([]byte, []int) {
+	return fileDescriptor_55df38726042d56c, []int{2}
+}
+func (m *TaskReward) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *TaskReward) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_TaskReward.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *TaskReward) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TaskReward.Merge(m, src)
+}
+func (m *TaskReward) XXX_Size() int {
+	return m.Size()
+}
+func (m *TaskReward) XXX_DiscardUnknown() {
+	xxx_messageInfo_TaskReward.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TaskReward proto.InternalMessageInfo
+
+func (m *TaskReward) GetTaskId() uint64 {
+	if m != nil {
+		return m.TaskId
+	}
+	return 0
+}
+
+func (m *TaskReward) GetClaimant() string {
+	if m != nil {
+		return m.Claimant
+	}
+	return ""
+}
+
+func (m *TaskReward) GetAmount() types.Coin {
+	if m != nil {
+		return m.Amount
+	}
+	return types.Coin{}
+}
+
+func (m *TaskReward) GetTimestamp() int64 {
+	if m != nil {
+		return m.Timestamp
+	}
+	return 0
+}
+
+func (m *TaskReward) GetTxHash() string {
+	if m != nil {
+		return m.TxHash
+	}
+	return ""
+}
+
+// filter options for querying tasks
+type TaskFilter struct {
+	Creator   string     `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Claimant  string     `protobuf:"bytes,2,opt,name=claimant,proto3" json:"claimant,omitempty"`
+	Approver  string     `protobuf:"bytes,3,opt,name=approver,proto3" json:"approver,omitempty"`
+	Status    TaskStatus `protobuf:"varint,4,opt,name=status,proto3,enum=taskbounty.task.v1.TaskStatus" json:"status,omitempty"`
+	MinBounty types.Coin `protobuf:"bytes,5,opt,name=min_bounty,json=minBounty,proto3" json:"min_bounty"`
+	MaxBounty types.Coin `protobuf:"bytes,6,opt,name=max_bounty,json=maxBounty,proto3" json:"max_bounty"`
+}
+
+func (m *TaskFilter) Reset()         { *m = TaskFilter{} }
+func (m *TaskFilter) String() string { return proto.CompactTextString(m) }
+func (*TaskFilter) ProtoMessage()    {}
+func (*TaskFilter) Descriptor() ([]byte, []int) {
+	return fileDescriptor_55df38726042d56c, []int{3}
+}
+func (m *TaskFilter) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *TaskFilter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_TaskFilter.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *TaskFilter) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TaskFilter.Merge(m, src)
+}
+func (m *TaskFilter) XXX_Size() int {
+	return m.Size()
+}
+func (m *TaskFilter) XXX_DiscardUnknown() {
+	xxx_messageInfo_TaskFilter.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TaskFilter proto.InternalMessageInfo
+
+func (m *TaskFilter) GetCreator() string {
+	if m != nil {
+		return m.Creator
+	}
+	return ""
+}
+
+func (m *TaskFilter) GetClaimant() string {
+	if m != nil {
+		return m.Claimant
+	}
+	return ""
+}
+
+func (m *TaskFilter) GetApprover() string {
+	if m != nil {
+		return m.Approver
+	}
+	return ""
+}
+
+func (m *TaskFilter) GetStatus() TaskStatus {
+	if m != nil {
+		return m.Status
+	}
+	return TASK_STATUS_UNDEFINED
+}
+
+func (m *TaskFilter) GetMinBounty() types.Coin {
+	if m != nil {
+		return m.MinBounty
+	}
+	return types.Coin{}
+}
+
+func (m *TaskFilter) GetMaxBounty() types.Coin {
+	if m != nil {
+		return m.MaxBounty
+	}
+	return types.Coin{}
+}
+
+// sort options for querying tasks
+type TaskSort struct {
+	Field     string `protobuf:"bytes,1,opt,name=field,proto3" json:"field,omitempty"`
+	Direction string `protobuf:"bytes,2,opt,name=direction,proto3" json:"direction,omitempty"`
+}
+
+func (m *TaskSort) Reset()         { *m = TaskSort{} }
+func (m *TaskSort) String() string { return proto.CompactTextString(m) }
+func (*TaskSort) ProtoMessage()    {}
+func (*TaskSort) Descriptor() ([]byte, []int) {
+	return fileDescriptor_55df38726042d56c, []int{4}
+}
+func (m *TaskSort) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *TaskSort) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_TaskSort.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *TaskSort) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TaskSort.Merge(m, src)
+}
+func (m *TaskSort) XXX_Size() int {
+	return m.Size()
+}
+func (m *TaskSort) XXX_DiscardUnknown() {
+	xxx_messageInfo_TaskSort.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TaskSort proto.InternalMessageInfo
+
+func (m *TaskSort) GetField() string {
+	if m != nil {
+		return m.Field
+	}
+	return ""
+}
+
+func (m *TaskSort) GetDirection() string {
+	if m != nil {
+		return m.Direction
+	}
+	return ""
+}
+
+// status transition
+type TaskTransition struct {
+	From TaskStatus `protobuf:"varint,1,opt,name=from,proto3,enum=taskbounty.task.v1.TaskStatus" json:"from,omitempty"`
+	To   TaskStatus `protobuf:"varint,2,opt,name=to,proto3,enum=taskbounty.task.v1.TaskStatus" json:"to,omitempty"`
+}
+
+func (m *TaskTransition) Reset()         { *m = TaskTransition{} }
+func (m *TaskTransition) String() string { return proto.CompactTextString(m) }
+func (*TaskTransition) ProtoMessage()    {}
+func (*TaskTransition) Descriptor() ([]byte, []int) {
+	return fileDescriptor_55df38726042d56c, []int{5}
+}
+func (m *TaskTransition) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *TaskTransition) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_TaskTransition.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *TaskTransition) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TaskTransition.Merge(m, src)
+}
+func (m *TaskTransition) XXX_Size() int {
+	return m.Size()
+}
+func (m *TaskTransition) XXX_DiscardUnknown() {
+	xxx_messageInfo_TaskTransition.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TaskTransition proto.InternalMessageInfo
+
+func (m *TaskTransition) GetFrom() TaskStatus {
+	if m != nil {
+		return m.From
+	}
+	return TASK_STATUS_UNDEFINED
+}
+
+func (m *TaskTransition) GetTo() TaskStatus {
+	if m != nil {
+		return m.To
+	}
+	return TASK_STATUS_UNDEFINED
+}
+
 func init() {
+	proto.RegisterEnum("taskbounty.task.v1.TaskStatus", TaskStatus_name, TaskStatus_value)
 	proto.RegisterType((*Task)(nil), "taskbounty.task.v1.Task")
+	proto.RegisterType((*TaskProof)(nil), "taskbounty.task.v1.TaskProof")
+	proto.RegisterType((*TaskReward)(nil), "taskbounty.task.v1.TaskReward")
+	proto.RegisterType((*TaskFilter)(nil), "taskbounty.task.v1.TaskFilter")
+	proto.RegisterType((*TaskSort)(nil), "taskbounty.task.v1.TaskSort")
+	proto.RegisterType((*TaskTransition)(nil), "taskbounty.task.v1.TaskTransition")
 }
 
 func init() { proto.RegisterFile("taskbounty/task/v1/task.proto", fileDescriptor_55df38726042d56c) }
 
 var fileDescriptor_55df38726042d56c = []byte{
-	// 312 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x4c, 0x91, 0xb1, 0x6e, 0xf2, 0x30,
-	0x10, 0xc7, 0xe3, 0x10, 0x02, 0x18, 0xe9, 0x1b, 0x2c, 0xf4, 0xd5, 0x45, 0xaa, 0x1b, 0x75, 0xca,
-	0x94, 0x28, 0xed, 0xd0, 0x9d, 0xbe, 0x41, 0xd4, 0xa9, 0x9b, 0x13, 0x5c, 0x64, 0x01, 0x39, 0xcb,
-	0x36, 0x51, 0x79, 0x82, 0xae, 0x7d, 0x2c, 0x46, 0xc6, 0x4e, 0x55, 0x05, 0x2f, 0x52, 0xc5, 0x86,
-	0x96, 0x29, 0xf7, 0xbb, 0xff, 0x9d, 0xf2, 0x93, 0x0f, 0xdf, 0x58, 0x6e, 0x96, 0x15, 0x6c, 0x1a,
-	0xbb, 0xcd, 0xbb, 0x32, 0x6f, 0x0b, 0xf7, 0xcd, 0x94, 0x06, 0x0b, 0x84, 0xfc, 0xc5, 0x99, 0x6b,
-	0xb7, 0xc5, 0x74, 0xb2, 0x80, 0x05, 0xb8, 0x38, 0xef, 0x2a, 0x3f, 0x39, 0x65, 0x35, 0x98, 0x35,
-	0x98, 0xbc, 0xe2, 0x46, 0xe4, 0x6d, 0x51, 0x09, 0xcb, 0x8b, 0xbc, 0x06, 0xd9, 0xf8, 0xfc, 0xee,
-	0x3d, 0xc4, 0xd1, 0x33, 0x37, 0x4b, 0xf2, 0x0f, 0x87, 0x72, 0x4e, 0x51, 0x82, 0xd2, 0xa8, 0x0c,
-	0xe5, 0x9c, 0x4c, 0x70, 0xdf, 0x4a, 0xbb, 0x12, 0x34, 0x4c, 0x50, 0x3a, 0x2a, 0x3d, 0x90, 0x04,
-	0x8f, 0xe7, 0xc2, 0xd4, 0x5a, 0x2a, 0x2b, 0xa1, 0xa1, 0x3d, 0x97, 0x5d, 0xb6, 0xc8, 0x23, 0x8e,
-	0xbd, 0x18, 0x8d, 0x12, 0x94, 0x8e, 0xef, 0xaf, 0x33, 0x6f, 0x90, 0x75, 0x06, 0xd9, 0xc9, 0x20,
-	0x7b, 0x02, 0xd9, 0xcc, 0xa2, 0xdd, 0xd7, 0x6d, 0x50, 0x9e, 0xc6, 0xc9, 0x7f, 0x1c, 0x1b, 0xcb,
-	0xed, 0xc6, 0xd0, 0x7e, 0x82, 0xd2, 0x5e, 0x79, 0x22, 0x32, 0xc5, 0xc3, 0x7a, 0xc5, 0xe5, 0x9a,
-	0x37, 0x96, 0xc6, 0xee, 0x7f, 0xbf, 0xdc, 0x49, 0x2a, 0x0d, 0xf0, 0x4a, 0x07, 0x5e, 0xd2, 0x41,
-	0xb7, 0xc1, 0x95, 0xd2, 0xd0, 0x0a, 0x4d, 0x87, 0x7e, 0xe3, 0xcc, 0x84, 0xe2, 0x41, 0xad, 0x05,
-	0xb7, 0xa0, 0xe9, 0xc8, 0x45, 0x67, 0x9c, 0x15, 0xbb, 0x03, 0x43, 0xfb, 0x03, 0x43, 0xdf, 0x07,
-	0x86, 0x3e, 0x8e, 0x2c, 0xd8, 0x1f, 0x59, 0xf0, 0x79, 0x64, 0xc1, 0xcb, 0xd5, 0xc5, 0x31, 0xde,
-	0xfc, 0x39, 0xec, 0x56, 0x09, 0x53, 0xc5, 0xee, 0x0d, 0x1f, 0x7e, 0x02, 0x00, 0x00, 0xff, 0xff,
-	0x6c, 0xfc, 0x0a, 0x65, 0xae, 0x01, 0x00, 0x00,
+	// 712 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x54, 0xcd, 0x4e, 0xdb, 0x4a,
+	0x14, 0x8e, 0x1d, 0xc7, 0xe0, 0x83, 0x84, 0xac, 0xb9, 0xb9, 0x17, 0x13, 0x5d, 0x7c, 0xa3, 0xac,
+	0xa2, 0xbb, 0x70, 0x14, 0x2a, 0x95, 0x1d, 0x52, 0x42, 0x8c, 0x9a, 0xb6, 0x40, 0xe4, 0x98, 0x2e,
+	0xba, 0x89, 0x26, 0xb1, 0x81, 0x11, 0xb1, 0xc7, 0xb2, 0x87, 0x34, 0xbc, 0x41, 0x97, 0x5d, 0xf5,
+	0x05, 0xfa, 0x04, 0x7d, 0x86, 0x6e, 0x58, 0xb2, 0xec, 0xaa, 0xaa, 0x40, 0x7d, 0x8f, 0x6a, 0x66,
+	0x1c, 0xf2, 0x53, 0xa9, 0xd0, 0x95, 0xcf, 0xf9, 0xce, 0x7c, 0x9e, 0x6f, 0xbe, 0x73, 0x66, 0x60,
+	0x87, 0xe1, 0xec, 0x72, 0x48, 0xaf, 0x62, 0x76, 0xdd, 0xe0, 0x61, 0x63, 0xd2, 0x14, 0x5f, 0x27,
+	0x49, 0x29, 0xa3, 0x08, 0xcd, 0xcb, 0x8e, 0x80, 0x27, 0xcd, 0x8a, 0x3d, 0xa2, 0x59, 0x44, 0xb3,
+	0xc6, 0x10, 0x67, 0x61, 0x63, 0xd2, 0x1c, 0x86, 0x0c, 0x37, 0x1b, 0x23, 0x4a, 0x62, 0xc9, 0xa9,
+	0x94, 0xcf, 0xe9, 0x39, 0x15, 0x61, 0x83, 0x47, 0x12, 0xad, 0xfd, 0x50, 0x41, 0xf3, 0x71, 0x76,
+	0x89, 0x36, 0x41, 0x25, 0x81, 0xa5, 0x54, 0x95, 0xba, 0xe6, 0xa9, 0x24, 0x40, 0x65, 0x28, 0x31,
+	0xc2, 0xc6, 0xa1, 0xa5, 0x56, 0x95, 0xba, 0xe1, 0xc9, 0x04, 0x55, 0x61, 0x23, 0x08, 0xb3, 0x51,
+	0x4a, 0x12, 0x46, 0x68, 0x6c, 0x15, 0x45, 0x6d, 0x11, 0x42, 0x7b, 0xa0, 0x4b, 0x61, 0x96, 0x56,
+	0x55, 0xea, 0x1b, 0xbb, 0xdb, 0x8e, 0xd4, 0xe5, 0x70, 0x5d, 0x4e, 0xae, 0xcb, 0x39, 0xa0, 0x24,
+	0x6e, 0x6b, 0x37, 0xdf, 0xfe, 0x2b, 0x78, 0xf9, 0x72, 0xf4, 0x1c, 0xf4, 0x8c, 0x61, 0x76, 0x95,
+	0x59, 0xa5, 0xaa, 0x52, 0xdf, 0xdc, 0xb5, 0x9d, 0x5f, 0x0f, 0xe9, 0x70, 0xa9, 0x7d, 0xb1, 0xca,
+	0xcb, 0x57, 0xa3, 0x0a, 0xac, 0x8f, 0xc6, 0x98, 0x44, 0x38, 0x66, 0x96, 0x2e, 0xf4, 0x3c, 0xe4,
+	0xfc, 0x10, 0x49, 0x4a, 0xe9, 0x99, 0xb5, 0x26, 0x0f, 0x21, 0x12, 0xce, 0xc0, 0x49, 0x92, 0xd2,
+	0x49, 0x98, 0x5a, 0xeb, 0x92, 0x31, 0xcb, 0x91, 0x05, 0x6b, 0xa3, 0x34, 0xc4, 0x8c, 0xa6, 0x96,
+	0x21, 0x4a, 0xb3, 0x14, 0xed, 0x00, 0x88, 0x30, 0x0c, 0x06, 0x98, 0x59, 0x50, 0x55, 0xea, 0x45,
+	0xcf, 0xc8, 0x91, 0x16, 0xe3, 0xe5, 0xab, 0x24, 0x98, 0x95, 0x37, 0x64, 0x39, 0x47, 0x5a, 0xac,
+	0x16, 0x82, 0xc1, 0xb5, 0xf7, 0x84, 0x00, 0x04, 0xda, 0x05, 0xce, 0x2e, 0x84, 0xdb, 0x86, 0x27,
+	0x62, 0x8e, 0xb1, 0xeb, 0x64, 0x66, 0xb7, 0x88, 0xd1, 0xbf, 0x60, 0x30, 0x12, 0x85, 0x19, 0xc3,
+	0x51, 0x22, 0xbc, 0x2e, 0x7a, 0x73, 0x80, 0x33, 0x02, 0xcc, 0xb0, 0xf0, 0xd9, 0xf0, 0x44, 0x5c,
+	0xfb, 0xac, 0x00, 0xf0, 0x7d, 0xbc, 0xf0, 0x1d, 0x4e, 0x03, 0xb4, 0x05, 0x6b, 0xdc, 0xb9, 0xc1,
+	0x43, 0x67, 0x75, 0x9e, 0x76, 0x83, 0x25, 0xd3, 0xd4, 0x15, 0xd3, 0xf6, 0x40, 0xc7, 0x11, 0xb7,
+	0x5d, 0x6c, 0xf9, 0x94, 0x0e, 0xca, 0xe5, 0xcb, 0x72, 0xb5, 0x55, 0xb9, 0x5c, 0xcb, 0x74, 0x20,
+	0xce, 0x5d, 0x12, 0x3b, 0xea, 0x6c, 0xfa, 0x02, 0x67, 0x17, 0xb5, 0x8f, 0xaa, 0xd4, 0x7c, 0x48,
+	0xc6, 0x6c, 0xb9, 0x03, 0xca, 0x72, 0x07, 0x7e, 0x27, 0x7a, 0xb1, 0xa7, 0xc5, 0x95, 0x9e, 0xce,
+	0x27, 0x4b, 0xfb, 0xa3, 0xc9, 0xda, 0x07, 0x88, 0x48, 0x3c, 0xc8, 0xc7, 0xb9, 0xf4, 0x34, 0x33,
+	0x8c, 0x88, 0xc4, 0x6d, 0x39, 0xd1, 0x9c, 0x8f, 0xa7, 0x33, 0xbe, 0xfe, 0x54, 0x3e, 0x9e, 0x4a,
+	0x7e, 0x6d, 0x1f, 0xd6, 0x85, 0x2a, 0x9a, 0x8a, 0x49, 0x3e, 0x23, 0xe1, 0x38, 0xc8, 0x3d, 0x91,
+	0x09, 0x77, 0x3c, 0x20, 0x69, 0x38, 0x12, 0x97, 0x51, 0x5a, 0x32, 0x07, 0x6a, 0x0c, 0x36, 0x39,
+	0xdf, 0x4f, 0x71, 0x9c, 0x11, 0x71, 0x39, 0x77, 0x41, 0x3b, 0x4b, 0x69, 0x24, 0x7e, 0xf2, 0xb8,
+	0x0f, 0x62, 0x2d, 0x72, 0x40, 0x65, 0x54, 0xfc, 0xfc, 0x71, 0x86, 0xca, 0xe8, 0xff, 0x5f, 0xf2,
+	0x11, 0x94, 0x10, 0xda, 0x86, 0xbf, 0xfd, 0x56, 0xff, 0xd5, 0xa0, 0xef, 0xb7, 0xfc, 0xd3, 0xfe,
+	0xe0, 0xf4, 0xb8, 0xe3, 0x1e, 0x76, 0x8f, 0xdd, 0x8e, 0x59, 0x40, 0x65, 0x30, 0x17, 0x4b, 0x27,
+	0x3d, 0xf7, 0xd8, 0x54, 0xd0, 0x16, 0xfc, 0xb5, 0x88, 0x1e, 0xbc, 0x6e, 0x75, 0x8f, 0xdc, 0x8e,
+	0xa9, 0xae, 0xfe, 0xa9, 0x7f, 0xda, 0x3e, 0xea, 0xfa, 0xbe, 0xdb, 0x31, 0x8b, 0xc8, 0x82, 0xf2,
+	0x62, 0xa9, 0xd5, 0xeb, 0x79, 0x27, 0x6f, 0xdc, 0x8e, 0xa9, 0xad, 0x56, 0x3c, 0xf7, 0xa5, 0x7b,
+	0xc0, 0x39, 0x25, 0xf4, 0x0f, 0xa0, 0xe5, 0x7d, 0x4e, 0xfa, 0x6e, 0xc7, 0xd4, 0x2b, 0xda, 0xfb,
+	0x4f, 0x76, 0xa1, 0xdd, 0xbc, 0xb9, 0xb3, 0x95, 0xdb, 0x3b, 0x5b, 0xf9, 0x7e, 0x67, 0x2b, 0x1f,
+	0xee, 0xed, 0xc2, 0xed, 0xbd, 0x5d, 0xf8, 0x7a, 0x6f, 0x17, 0xde, 0x6e, 0x2d, 0x3c, 0xcd, 0x53,
+	0xf9, 0x38, 0xf3, 0xcb, 0x9a, 0x0d, 0x75, 0xf1, 0xa2, 0x3e, 0xfb, 0x19, 0x00, 0x00, 0xff, 0xff,
+	0x6a, 0x4e, 0xa9, 0xfc, 0xbc, 0x05, 0x00, 0x00,
 }
 
 func (m *Task) Marshal() (dAtA []byte, err error) {
@@ -184,6 +608,16 @@ func (m *Task) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.UpdatedAt != 0 {
+		i = encodeVarintTask(dAtA, i, uint64(m.UpdatedAt))
+		i--
+		dAtA[i] = 0x58
+	}
+	if m.CreatedAt != 0 {
+		i = encodeVarintTask(dAtA, i, uint64(m.CreatedAt))
+		i--
+		dAtA[i] = 0x50
+	}
 	if len(m.Creator) > 0 {
 		i -= len(m.Creator)
 		copy(dAtA[i:], m.Creator)
@@ -249,6 +683,251 @@ func (m *Task) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *TaskProof) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TaskProof) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TaskProof) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Data) > 0 {
+		i -= len(m.Data)
+		copy(dAtA[i:], m.Data)
+		i = encodeVarintTask(dAtA, i, uint64(len(m.Data)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.Timestamp != 0 {
+		i = encodeVarintTask(dAtA, i, uint64(m.Timestamp))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.Type) > 0 {
+		i -= len(m.Type)
+		copy(dAtA[i:], m.Type)
+		i = encodeVarintTask(dAtA, i, uint64(len(m.Type)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Hash) > 0 {
+		i -= len(m.Hash)
+		copy(dAtA[i:], m.Hash)
+		i = encodeVarintTask(dAtA, i, uint64(len(m.Hash)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TaskReward) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TaskReward) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TaskReward) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.TxHash) > 0 {
+		i -= len(m.TxHash)
+		copy(dAtA[i:], m.TxHash)
+		i = encodeVarintTask(dAtA, i, uint64(len(m.TxHash)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if m.Timestamp != 0 {
+		i = encodeVarintTask(dAtA, i, uint64(m.Timestamp))
+		i--
+		dAtA[i] = 0x20
+	}
+	{
+		size, err := m.Amount.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTask(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x1a
+	if len(m.Claimant) > 0 {
+		i -= len(m.Claimant)
+		copy(dAtA[i:], m.Claimant)
+		i = encodeVarintTask(dAtA, i, uint64(len(m.Claimant)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.TaskId != 0 {
+		i = encodeVarintTask(dAtA, i, uint64(m.TaskId))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TaskFilter) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TaskFilter) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TaskFilter) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size, err := m.MaxBounty.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTask(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x32
+	{
+		size, err := m.MinBounty.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTask(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x2a
+	if m.Status != 0 {
+		i = encodeVarintTask(dAtA, i, uint64(m.Status))
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.Approver) > 0 {
+		i -= len(m.Approver)
+		copy(dAtA[i:], m.Approver)
+		i = encodeVarintTask(dAtA, i, uint64(len(m.Approver)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Claimant) > 0 {
+		i -= len(m.Claimant)
+		copy(dAtA[i:], m.Claimant)
+		i = encodeVarintTask(dAtA, i, uint64(len(m.Claimant)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintTask(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TaskSort) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TaskSort) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TaskSort) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Direction) > 0 {
+		i -= len(m.Direction)
+		copy(dAtA[i:], m.Direction)
+		i = encodeVarintTask(dAtA, i, uint64(len(m.Direction)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Field) > 0 {
+		i -= len(m.Field)
+		copy(dAtA[i:], m.Field)
+		i = encodeVarintTask(dAtA, i, uint64(len(m.Field)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TaskTransition) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TaskTransition) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TaskTransition) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.To != 0 {
+		i = encodeVarintTask(dAtA, i, uint64(m.To))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.From != 0 {
+		i = encodeVarintTask(dAtA, i, uint64(m.From))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTask(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTask(v)
 	base := offset
@@ -297,6 +976,121 @@ func (m *Task) Size() (n int) {
 	l = len(m.Creator)
 	if l > 0 {
 		n += 1 + l + sovTask(uint64(l))
+	}
+	if m.CreatedAt != 0 {
+		n += 1 + sovTask(uint64(m.CreatedAt))
+	}
+	if m.UpdatedAt != 0 {
+		n += 1 + sovTask(uint64(m.UpdatedAt))
+	}
+	return n
+}
+
+func (m *TaskProof) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Hash)
+	if l > 0 {
+		n += 1 + l + sovTask(uint64(l))
+	}
+	l = len(m.Type)
+	if l > 0 {
+		n += 1 + l + sovTask(uint64(l))
+	}
+	if m.Timestamp != 0 {
+		n += 1 + sovTask(uint64(m.Timestamp))
+	}
+	l = len(m.Data)
+	if l > 0 {
+		n += 1 + l + sovTask(uint64(l))
+	}
+	return n
+}
+
+func (m *TaskReward) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.TaskId != 0 {
+		n += 1 + sovTask(uint64(m.TaskId))
+	}
+	l = len(m.Claimant)
+	if l > 0 {
+		n += 1 + l + sovTask(uint64(l))
+	}
+	l = m.Amount.Size()
+	n += 1 + l + sovTask(uint64(l))
+	if m.Timestamp != 0 {
+		n += 1 + sovTask(uint64(m.Timestamp))
+	}
+	l = len(m.TxHash)
+	if l > 0 {
+		n += 1 + l + sovTask(uint64(l))
+	}
+	return n
+}
+
+func (m *TaskFilter) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovTask(uint64(l))
+	}
+	l = len(m.Claimant)
+	if l > 0 {
+		n += 1 + l + sovTask(uint64(l))
+	}
+	l = len(m.Approver)
+	if l > 0 {
+		n += 1 + l + sovTask(uint64(l))
+	}
+	if m.Status != 0 {
+		n += 1 + sovTask(uint64(m.Status))
+	}
+	l = m.MinBounty.Size()
+	n += 1 + l + sovTask(uint64(l))
+	l = m.MaxBounty.Size()
+	n += 1 + l + sovTask(uint64(l))
+	return n
+}
+
+func (m *TaskSort) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Field)
+	if l > 0 {
+		n += 1 + l + sovTask(uint64(l))
+	}
+	l = len(m.Direction)
+	if l > 0 {
+		n += 1 + l + sovTask(uint64(l))
+	}
+	return n
+}
+
+func (m *TaskTransition) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.From != 0 {
+		n += 1 + sovTask(uint64(m.From))
+	}
+	if m.To != 0 {
+		n += 1 + sovTask(uint64(m.To))
 	}
 	return n
 }
@@ -466,7 +1260,7 @@ func (m *Task) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Status |= int64(b&0x7F) << shift
+				m.Status |= TaskStatus(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -599,6 +1393,827 @@ func (m *Task) Unmarshal(dAtA []byte) error {
 			}
 			m.Creator = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 10:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CreatedAt", wireType)
+			}
+			m.CreatedAt = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.CreatedAt |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 11:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UpdatedAt", wireType)
+			}
+			m.UpdatedAt = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.UpdatedAt |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTask(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTask
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TaskProof) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTask
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: TaskProof: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: TaskProof: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Hash", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTask
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTask
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Hash = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Type", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTask
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTask
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Type = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Timestamp", wireType)
+			}
+			m.Timestamp = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Timestamp |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Data", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTask
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTask
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Data = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTask(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTask
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TaskReward) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTask
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: TaskReward: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: TaskReward: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TaskId", wireType)
+			}
+			m.TaskId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.TaskId |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Claimant", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTask
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTask
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Claimant = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Amount", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTask
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTask
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Amount.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Timestamp", wireType)
+			}
+			m.Timestamp = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Timestamp |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TxHash", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTask
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTask
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.TxHash = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTask(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTask
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TaskFilter) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTask
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: TaskFilter: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: TaskFilter: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTask
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTask
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Claimant", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTask
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTask
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Claimant = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Approver", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTask
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTask
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Approver = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			}
+			m.Status = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Status |= TaskStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MinBounty", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTask
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTask
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MinBounty.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MaxBounty", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTask
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTask
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MaxBounty.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTask(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTask
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TaskSort) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTask
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: TaskSort: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: TaskSort: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Field", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTask
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTask
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Field = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Direction", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTask
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTask
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Direction = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTask(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTask
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TaskTransition) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTask
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: TaskTransition: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: TaskTransition: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field From", wireType)
+			}
+			m.From = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.From |= TaskStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field To", wireType)
+			}
+			m.To = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTask
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.To |= TaskStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTask(dAtA[iNdEx:])
