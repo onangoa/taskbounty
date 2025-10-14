@@ -2,6 +2,7 @@ syntax = "proto3";
 package taskbounty.task.v1;
 
 import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
 import "gogoproto/gogo.proto";
 
 option go_package = "taskbounty/x/task/types";
@@ -10,4 +11,19 @@ option go_package = "taskbounty/x/task/types";
 message Params {
   option (amino.name) = "taskbounty/x/task/Params";
   option (gogoproto.equal) = true;
+  
+  // minimum bounty amount for a task
+  cosmos.base.v1beta1.Coin min_bounty = 1 [(gogoproto.nullable) = false];
+  // maximum bounty amount for a task
+  cosmos.base.v1beta1.Coin max_bounty = 2 [(gogoproto.nullable) = false];
+  uint32 max_title_length = 3;
+  uint32 max_description_length = 4;
+  repeated string proof_types = 5;
+  uint32 auto_approve_threshold = 6;
+  // in seconds
+  uint64 task_expiry = 7;
+  // in seconds
+  uint64 claim_deadline = 8;
+  // seconds
+  uint64 submission_deadline = 9;
 }
