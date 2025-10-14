@@ -6,15 +6,69 @@ import "gogoproto/gogo.proto";
 
 option go_package = "taskbounty/x/task/types";
 
-// Task defines the Task message.
+// TaskStatus enum
+enum TaskStatus {
+  option (gogoproto.goproto_enum_prefix) = false;
+  
+  TASK_STATUS_UNDEFINED = 0;
+  TASK_STATUS_OPEN = 1;
+  TASK_STATUS_CLAIMED = 2;
+  TASK_STATUS_SUBMITTED = 3;
+  TASK_STATUS_APPROVED = 4;
+  TASK_STATUS_REJECTED = 5;
+  TASK_STATUS_CLOSED = 6;
+}
+
+// Task message.
 message Task {
   uint64 id = 1;
   string title = 2;
   string description = 3;
   cosmos.base.v1beta1.Coin bounty = 4 [(gogoproto.nullable) = false];
-  int64 status = 5;
+  TaskStatus status = 5;
   string claimant = 6;
   string proof = 7;
   string approver = 8;
   string creator = 9;
+  int64 created_at = 10;
+  int64 updated_at = 11;
+}
+
+// proof of task completion
+message TaskProof {
+  string hash = 1;
+  string type = 2;
+  int64 timestamp = 3;
+  string data = 4;
+}
+
+//reward distribution for completed tasks
+message TaskReward {
+  uint64 task_id = 1;
+  string claimant = 2;
+  cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
+  int64 timestamp = 4;
+  string tx_hash = 5;
+}
+
+//filter options for querying tasks
+message TaskFilter {
+  string creator = 1;
+  string claimant = 2;
+  string approver = 3;
+  TaskStatus status = 4;
+  cosmos.base.v1beta1.Coin min_bounty = 5 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin max_bounty = 6 [(gogoproto.nullable) = false];
+}
+
+// sort options for querying tasks
+message TaskSort {
+  string field = 1; // just the fields -> "id", "bounty", "status", "created_at"
+  string direction = 2; // "asc", "desc"
+}
+
+// status transition
+message TaskTransition {
+  TaskStatus from = 1;
+  TaskStatus to = 2;
 }
