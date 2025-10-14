@@ -5,13 +5,13 @@ package types
 
 import (
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-
+	types "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/cosmos/cosmos-sdk/types/tx/amino"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	proto "github.com/cosmos/gogoproto/proto"
+	io "io"
+	math "math"
+	math_bits "math/bits"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -27,6 +27,20 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // Params defines the parameters for the module.
 type Params struct {
+	// minimum bounty amount for a task
+	MinBounty types.Coin `protobuf:"bytes,1,opt,name=min_bounty,json=minBounty,proto3" json:"min_bounty"`
+	// maximum bounty amount for a task
+	MaxBounty            types.Coin `protobuf:"bytes,2,opt,name=max_bounty,json=maxBounty,proto3" json:"max_bounty"`
+	MaxTitleLength       uint32     `protobuf:"varint,3,opt,name=max_title_length,json=maxTitleLength,proto3" json:"max_title_length,omitempty"`
+	MaxDescriptionLength uint32     `protobuf:"varint,4,opt,name=max_description_length,json=maxDescriptionLength,proto3" json:"max_description_length,omitempty"`
+	ProofTypes           []string   `protobuf:"bytes,5,rep,name=proof_types,json=proofTypes,proto3" json:"proof_types,omitempty"`
+	AutoApproveThreshold uint32     `protobuf:"varint,6,opt,name=auto_approve_threshold,json=autoApproveThreshold,proto3" json:"auto_approve_threshold,omitempty"`
+	// in seconds
+	TaskExpiry uint64 `protobuf:"varint,7,opt,name=task_expiry,json=taskExpiry,proto3" json:"task_expiry,omitempty"`
+	// in seconds
+	ClaimDeadline uint64 `protobuf:"varint,8,opt,name=claim_deadline,json=claimDeadline,proto3" json:"claim_deadline,omitempty"`
+	// seconds
+	SubmissionDeadline uint64 `protobuf:"varint,9,opt,name=submission_deadline,json=submissionDeadline,proto3" json:"submission_deadline,omitempty"`
 }
 
 func (m *Params) Reset()         { *m = Params{} }
@@ -62,6 +76,69 @@ func (m *Params) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Params proto.InternalMessageInfo
 
+func (m *Params) GetMinBounty() types.Coin {
+	if m != nil {
+		return m.MinBounty
+	}
+	return types.Coin{}
+}
+
+func (m *Params) GetMaxBounty() types.Coin {
+	if m != nil {
+		return m.MaxBounty
+	}
+	return types.Coin{}
+}
+
+func (m *Params) GetMaxTitleLength() uint32 {
+	if m != nil {
+		return m.MaxTitleLength
+	}
+	return 0
+}
+
+func (m *Params) GetMaxDescriptionLength() uint32 {
+	if m != nil {
+		return m.MaxDescriptionLength
+	}
+	return 0
+}
+
+func (m *Params) GetProofTypes() []string {
+	if m != nil {
+		return m.ProofTypes
+	}
+	return nil
+}
+
+func (m *Params) GetAutoApproveThreshold() uint32 {
+	if m != nil {
+		return m.AutoApproveThreshold
+	}
+	return 0
+}
+
+func (m *Params) GetTaskExpiry() uint64 {
+	if m != nil {
+		return m.TaskExpiry
+	}
+	return 0
+}
+
+func (m *Params) GetClaimDeadline() uint64 {
+	if m != nil {
+		return m.ClaimDeadline
+	}
+	return 0
+}
+
+func (m *Params) GetSubmissionDeadline() uint64 {
+	if m != nil {
+		return m.SubmissionDeadline
+	}
+	return 0
+}
+
 func init() {
 	proto.RegisterType((*Params)(nil), "taskbounty.task.v1.Params")
 }
@@ -69,17 +146,34 @@ func init() {
 func init() { proto.RegisterFile("taskbounty/task/v1/params.proto", fileDescriptor_55437bd3f072ca1d) }
 
 var fileDescriptor_55437bd3f072ca1d = []byte{
-	// 156 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x92, 0x2f, 0x49, 0x2c, 0xce,
-	0x4e, 0xca, 0x2f, 0xcd, 0x2b, 0xa9, 0xd4, 0x07, 0x31, 0xf5, 0xcb, 0x0c, 0xf5, 0x0b, 0x12, 0x8b,
-	0x12, 0x73, 0x8b, 0xf5, 0x0a, 0x8a, 0xf2, 0x4b, 0xf2, 0x85, 0x84, 0x10, 0x0a, 0xf4, 0x40, 0x4c,
-	0xbd, 0x32, 0x43, 0x29, 0xc1, 0xc4, 0xdc, 0xcc, 0xbc, 0x7c, 0x7d, 0x30, 0x09, 0x51, 0x26, 0x25,
-	0x92, 0x9e, 0x9f, 0x9e, 0x0f, 0x66, 0xea, 0x83, 0x58, 0x10, 0x51, 0x25, 0x6d, 0x2e, 0xb6, 0x00,
-	0xb0, 0x61, 0x56, 0x8a, 0x2f, 0x16, 0xc8, 0x33, 0x76, 0x3d, 0xdf, 0xa0, 0x25, 0x81, 0x64, 0x61,
-	0x05, 0xc4, 0x4a, 0x88, 0x12, 0x27, 0xc3, 0x13, 0x8f, 0xe4, 0x18, 0x2f, 0x3c, 0x92, 0x63, 0x7c,
-	0xf0, 0x48, 0x8e, 0x71, 0xc2, 0x63, 0x39, 0x86, 0x0b, 0x8f, 0xe5, 0x18, 0x6e, 0x3c, 0x96, 0x63,
-	0x88, 0x12, 0xc7, 0xd4, 0x53, 0x52, 0x59, 0x90, 0x5a, 0x9c, 0xc4, 0x06, 0xb6, 0xc6, 0x18, 0x10,
-	0x00, 0x00, 0xff, 0xff, 0xe1, 0x5c, 0x9d, 0x90, 0xc6, 0x00, 0x00, 0x00,
+	// 428 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x92, 0xb1, 0xae, 0xd3, 0x30,
+	0x18, 0x85, 0x6b, 0x5a, 0x0a, 0xf5, 0xd5, 0xbd, 0x82, 0x70, 0x05, 0xe1, 0x0e, 0x69, 0x41, 0x42,
+	0x8a, 0x18, 0x62, 0x05, 0x98, 0x18, 0x90, 0x28, 0x97, 0x8d, 0x01, 0x55, 0x9d, 0x58, 0x22, 0x27,
+	0x31, 0xad, 0x45, 0xec, 0xdf, 0x8a, 0xdd, 0x28, 0x7d, 0x05, 0x26, 0x1e, 0x81, 0x47, 0xe0, 0x31,
+	0xee, 0xd8, 0x11, 0x09, 0x09, 0xa1, 0x76, 0x80, 0xc7, 0x40, 0xb6, 0x13, 0x8a, 0xc4, 0xc2, 0x12,
+	0xfd, 0x3a, 0xe7, 0x7c, 0xc7, 0x8a, 0xfd, 0xe3, 0xa9, 0xa1, 0xfa, 0x43, 0x0e, 0x1b, 0x69, 0xb6,
+	0xc4, 0x8e, 0xa4, 0x49, 0x89, 0xa2, 0x35, 0x15, 0x3a, 0x51, 0x35, 0x18, 0x08, 0x82, 0x63, 0x20,
+	0xb1, 0x63, 0xd2, 0xa4, 0x17, 0xb7, 0xa9, 0xe0, 0x12, 0x88, 0xfb, 0xfa, 0xd8, 0x45, 0x54, 0x80,
+	0x16, 0xa0, 0x49, 0x4e, 0x35, 0x23, 0x4d, 0x9a, 0x33, 0x43, 0x53, 0x52, 0x00, 0x97, 0x9d, 0x7f,
+	0xbe, 0x82, 0x15, 0xb8, 0x91, 0xd8, 0xc9, 0xab, 0x0f, 0xbf, 0x0d, 0xf1, 0xf8, 0xad, 0x3b, 0x2d,
+	0x78, 0x81, 0xb1, 0xe0, 0x32, 0xf3, 0x27, 0x85, 0x68, 0x86, 0xe2, 0x93, 0x27, 0xf7, 0x13, 0xdf,
+	0x9a, 0xd8, 0xd6, 0xa4, 0x6b, 0x4d, 0x5e, 0x01, 0x97, 0xf3, 0xd1, 0xd5, 0xf7, 0xe9, 0x60, 0x31,
+	0x11, 0x5c, 0xce, 0x1d, 0xe1, 0x78, 0xda, 0xf6, 0xfc, 0xb5, 0xff, 0xe5, 0x69, 0xdb, 0xf1, 0x31,
+	0xbe, 0x65, 0x79, 0xc3, 0x4d, 0xc5, 0xb2, 0x8a, 0xc9, 0x95, 0x59, 0x87, 0xc3, 0x19, 0x8a, 0x4f,
+	0x17, 0x67, 0x82, 0xb6, 0x4b, 0x2b, 0xbf, 0x71, 0x6a, 0xf0, 0x0c, 0xdf, 0xb5, 0xc9, 0x92, 0xe9,
+	0xa2, 0xe6, 0xca, 0x70, 0x90, 0x7d, 0x7e, 0xe4, 0xf2, 0xe7, 0x82, 0xb6, 0x97, 0x47, 0xb3, 0xa3,
+	0xa6, 0xf8, 0x44, 0xd5, 0x00, 0xef, 0x33, 0xb3, 0x55, 0x4c, 0x87, 0xd7, 0x67, 0xc3, 0x78, 0xb2,
+	0xc0, 0x4e, 0x5a, 0x5a, 0xc5, 0xd6, 0xd2, 0x8d, 0x81, 0x8c, 0x2a, 0x55, 0x43, 0xc3, 0x32, 0xb3,
+	0xae, 0x99, 0x5e, 0x43, 0x55, 0x86, 0x63, 0x5f, 0x6b, 0xdd, 0x97, 0xde, 0x5c, 0xf6, 0x9e, 0xad,
+	0xb5, 0xaf, 0x92, 0xb1, 0x56, 0xf1, 0x7a, 0x1b, 0xde, 0x98, 0xa1, 0x78, 0xb4, 0xc0, 0x56, 0x7a,
+	0xed, 0x94, 0xe0, 0x11, 0x3e, 0x2b, 0x2a, 0xca, 0x45, 0x56, 0x32, 0x5a, 0x56, 0x5c, 0xb2, 0xf0,
+	0xa6, 0xcb, 0x9c, 0x3a, 0xf5, 0xb2, 0x13, 0x03, 0x82, 0xef, 0xe8, 0x4d, 0x2e, 0xb8, 0xd6, 0xf6,
+	0x7f, 0xfe, 0x64, 0x27, 0x2e, 0x1b, 0x1c, 0xad, 0x1e, 0x78, 0xfe, 0xe0, 0xd7, 0xe7, 0x29, 0xfa,
+	0xf8, 0xf3, 0xcb, 0xe3, 0xf0, 0xaf, 0x0d, 0x6a, 0xfd, 0x0e, 0xf9, 0x27, 0x9d, 0xa7, 0x57, 0xfb,
+	0x08, 0xed, 0xf6, 0x11, 0xfa, 0xb1, 0x8f, 0xd0, 0xa7, 0x43, 0x34, 0xd8, 0x1d, 0xa2, 0xc1, 0xd7,
+	0x43, 0x34, 0x78, 0x77, 0xef, 0x5f, 0xc6, 0x5d, 0x4b, 0x3e, 0x76, 0x7b, 0xf1, 0xf4, 0x77, 0x00,
+	0x00, 0x00, 0xff, 0xff, 0x14, 0x2d, 0xe2, 0x71, 0x97, 0x02, 0x00, 0x00,
 }
 
 func (this *Params) Equal(that interface{}) bool {
@@ -99,6 +193,38 @@ func (this *Params) Equal(that interface{}) bool {
 	if that1 == nil {
 		return this == nil
 	} else if this == nil {
+		return false
+	}
+	if !this.MinBounty.Equal(&that1.MinBounty) {
+		return false
+	}
+	if !this.MaxBounty.Equal(&that1.MaxBounty) {
+		return false
+	}
+	if this.MaxTitleLength != that1.MaxTitleLength {
+		return false
+	}
+	if this.MaxDescriptionLength != that1.MaxDescriptionLength {
+		return false
+	}
+	if len(this.ProofTypes) != len(that1.ProofTypes) {
+		return false
+	}
+	for i := range this.ProofTypes {
+		if this.ProofTypes[i] != that1.ProofTypes[i] {
+			return false
+		}
+	}
+	if this.AutoApproveThreshold != that1.AutoApproveThreshold {
+		return false
+	}
+	if this.TaskExpiry != that1.TaskExpiry {
+		return false
+	}
+	if this.ClaimDeadline != that1.ClaimDeadline {
+		return false
+	}
+	if this.SubmissionDeadline != that1.SubmissionDeadline {
 		return false
 	}
 	return true
@@ -123,6 +249,65 @@ func (m *Params) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.SubmissionDeadline != 0 {
+		i = encodeVarintParams(dAtA, i, uint64(m.SubmissionDeadline))
+		i--
+		dAtA[i] = 0x48
+	}
+	if m.ClaimDeadline != 0 {
+		i = encodeVarintParams(dAtA, i, uint64(m.ClaimDeadline))
+		i--
+		dAtA[i] = 0x40
+	}
+	if m.TaskExpiry != 0 {
+		i = encodeVarintParams(dAtA, i, uint64(m.TaskExpiry))
+		i--
+		dAtA[i] = 0x38
+	}
+	if m.AutoApproveThreshold != 0 {
+		i = encodeVarintParams(dAtA, i, uint64(m.AutoApproveThreshold))
+		i--
+		dAtA[i] = 0x30
+	}
+	if len(m.ProofTypes) > 0 {
+		for iNdEx := len(m.ProofTypes) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.ProofTypes[iNdEx])
+			copy(dAtA[i:], m.ProofTypes[iNdEx])
+			i = encodeVarintParams(dAtA, i, uint64(len(m.ProofTypes[iNdEx])))
+			i--
+			dAtA[i] = 0x2a
+		}
+	}
+	if m.MaxDescriptionLength != 0 {
+		i = encodeVarintParams(dAtA, i, uint64(m.MaxDescriptionLength))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.MaxTitleLength != 0 {
+		i = encodeVarintParams(dAtA, i, uint64(m.MaxTitleLength))
+		i--
+		dAtA[i] = 0x18
+	}
+	{
+		size, err := m.MaxBounty.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintParams(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x12
+	{
+		size, err := m.MinBounty.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintParams(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
 	return len(dAtA) - i, nil
 }
 
@@ -143,6 +328,34 @@ func (m *Params) Size() (n int) {
 	}
 	var l int
 	_ = l
+	l = m.MinBounty.Size()
+	n += 1 + l + sovParams(uint64(l))
+	l = m.MaxBounty.Size()
+	n += 1 + l + sovParams(uint64(l))
+	if m.MaxTitleLength != 0 {
+		n += 1 + sovParams(uint64(m.MaxTitleLength))
+	}
+	if m.MaxDescriptionLength != 0 {
+		n += 1 + sovParams(uint64(m.MaxDescriptionLength))
+	}
+	if len(m.ProofTypes) > 0 {
+		for _, s := range m.ProofTypes {
+			l = len(s)
+			n += 1 + l + sovParams(uint64(l))
+		}
+	}
+	if m.AutoApproveThreshold != 0 {
+		n += 1 + sovParams(uint64(m.AutoApproveThreshold))
+	}
+	if m.TaskExpiry != 0 {
+		n += 1 + sovParams(uint64(m.TaskExpiry))
+	}
+	if m.ClaimDeadline != 0 {
+		n += 1 + sovParams(uint64(m.ClaimDeadline))
+	}
+	if m.SubmissionDeadline != 0 {
+		n += 1 + sovParams(uint64(m.SubmissionDeadline))
+	}
 	return n
 }
 
@@ -181,6 +394,218 @@ func (m *Params) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: Params: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MinBounty", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthParams
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthParams
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MinBounty.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MaxBounty", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthParams
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthParams
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MaxBounty.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MaxTitleLength", wireType)
+			}
+			m.MaxTitleLength = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.MaxTitleLength |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MaxDescriptionLength", wireType)
+			}
+			m.MaxDescriptionLength = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.MaxDescriptionLength |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ProofTypes", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthParams
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthParams
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ProofTypes = append(m.ProofTypes, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AutoApproveThreshold", wireType)
+			}
+			m.AutoApproveThreshold = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.AutoApproveThreshold |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 7:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TaskExpiry", wireType)
+			}
+			m.TaskExpiry = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.TaskExpiry |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 8:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ClaimDeadline", wireType)
+			}
+			m.ClaimDeadline = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ClaimDeadline |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 9:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SubmissionDeadline", wireType)
+			}
+			m.SubmissionDeadline = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowParams
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.SubmissionDeadline |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipParams(dAtA[iNdEx:])
