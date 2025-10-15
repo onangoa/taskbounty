@@ -27,6 +27,21 @@ service Query {
   rpc ListTask(QueryAllTaskRequest) returns (QueryAllTaskResponse) {
     option (google.api.http).get = "/taskbounty/task/v1/task";
   }
+  
+  // Queries list of TaskReward items
+  rpc GetTaskReward(QueryGetTaskRewardRequest) returns (QueryGetTaskRewardResponse) {
+    option (google.api.http).get = "/taskbounty/task/v1/task_reward/{id}";
+  }
+
+  // Queries TaskReward
+  rpc ListTaskReward(QueryAllTaskRewardRequest) returns (QueryAllTaskRewardResponse) {
+    option (google.api.http).get = "/taskbounty/task/v1/task_reward";
+  }
+  
+  // Queries TaskReward items by claimant
+  rpc GetTaskRewardsByClaimant(QueryGetTaskRewardsByClaimantRequest) returns (QueryGetTaskRewardsByClaimantResponse) {
+    option (google.api.http).get = "/taskbounty/task/v1/task_rewards/{claimant}";
+  }
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -60,4 +75,35 @@ message QueryAllTaskRequest {
 message QueryAllTaskResponse {
   repeated Task task = 1 [(gogoproto.nullable) = false];
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryGetTaskRewardRequest defines the QueryGetTaskRewardRequest message.
+message QueryGetTaskRewardRequest {
+  uint64 id = 1;
+}
+
+// QueryGetTaskRewardResponse defines the QueryGetTaskRewardResponse message.
+message QueryGetTaskRewardResponse {
+  TaskReward task_reward = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryAllTaskRewardRequest defines the QueryAllTaskRewardRequest message.
+message QueryAllTaskRewardRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryAllTaskRewardResponse defines the QueryAllTaskRewardResponse message.
+message QueryAllTaskRewardResponse {
+  repeated TaskReward task_reward = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryGetTaskRewardsByClaimantRequest defines the QueryGetTaskRewardsByClaimantRequest message.
+message QueryGetTaskRewardsByClaimantRequest {
+  string claimant = 1;
+}
+
+// QueryGetTaskRewardsByClaimantResponse defines the QueryGetTaskRewardsByClaimantResponse message.
+message QueryGetTaskRewardsByClaimantResponse {
+  repeated TaskReward task_rewards = 1 [(gogoproto.nullable) = false];
 }
