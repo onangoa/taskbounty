@@ -23,6 +23,7 @@ type Keeper struct {
 	Params  collections.Item[types.Params]
 	TaskSeq collections.Sequence
 	Task    collections.Map[uint64, types.Task]
+	TaskReward collections.Map[uint64, types.TaskReward]
 }
 
 func NewKeeper(
@@ -47,6 +48,7 @@ func NewKeeper(
 		Params:  collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 		Task:    collections.NewMap(sb, types.TaskKey, "task", collections.Uint64Key, codec.CollValue[types.Task](cdc)),
 		TaskSeq: collections.NewSequence(sb, types.TaskCountKey, "taskSequence"),
+		TaskReward: collections.NewMap(sb, collections.NewPrefix(1), "task_reward", collections.Uint64Key, codec.CollValue[types.TaskReward](cdc)),
 	}
 	schema, err := sb.Build()
 	if err != nil {
