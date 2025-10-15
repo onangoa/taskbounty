@@ -73,3 +73,341 @@ return []TaskTransition{
 }
 }
 
+func IsValidTransition(from, to TaskStatus) bool {
+for _, transition := range GetValidTransitions() {
+if transition.From == from && transition.To == to {
+return true
+}
+}
+return false
+}
+
+func GetTransitionsFrom(status TaskStatus) []TaskStatus {
+var transitions []TaskStatus
+for _, transition := range GetValidTransitions() {
+if transition.From == status {
+transitions = append(transitions, transition.To)
+}
+}
+return transitions
+}
+
+func (t Task) Validate(params Params) error {
+if strings.TrimSpace(t.Title) == "" {
+return fmt.Errorf("title cannot be empty")
+}
+if uint32(len(t.Title)) > params.MaxTitleLength {
+return fmt.Errorf("title exceeds maximum length of %d", params.MaxTitleLength)
+}
+
+	if strings.TrimSpace(t.Description) == "" {
+		return fmt.Errorf("description cannot be empty")
+	}
+	if uint32(len(t.Description)) > params.MaxDescriptionLength {
+		return fmt.Errorf("description exceeds maximum length of %d", params.MaxDescriptionLength)
+	}
+
+	if t.Bounty.IsZero() {
+		return fmt.Errorf("bounty cannot be zero")
+	}
+	if t.Bounty.IsNegative() {
+		return fmt.Errorf("bounty cannot be negative")
+	}
+	if t.Bounty.Amount.LT(params.MinBounty.Amount) {
+		return fmt.Errorf("bounty amount is below minimum of %s", params.MinBounty.String())
+	}
+	if !params.MaxBounty.IsZero() && t.Bounty.Amount.GT(params.MaxBounty.Amount) {
+		return fmt.Errorf("bounty amount exceeds maximum of %s", params.MaxBounty.String())
+	}
+	if t.Bounty.Denom != params.MinBounty.Denom {
+		return fmt.Errorf("bounty denom must be %s", params.MinBounty.Denom)
+	}
+	if !IsValidTaskStatus(t.Status) {
+		return fmt.Errorf("invalid task status: %s", TaskStatusToString(t.Status))
+	}
+	if strings.TrimSpace(t.Creator) == "" {
+		return fmt.Errorf("creator cannot be empty")
+	}
+	if _, err := sdk.AccAddressFromBech32(t.Creator); err != nil {
+		return fmt.Errorf("invalid creator address: %s", err)
+	}
+	if t.CreatedAt <= 0 {
+		return fmt.Errorf("created_at must be positive")
+	}
+	if t.UpdatedAt < t.CreatedAt {
+		return fmt.Errorf("updated_at cannot be before created_at")
+	}
+	if strings.TrimSpace(t.Claimant) != "" {
+		if _, err := sdk.AccAddressFromBech32(t.Claimant); err != nil {
+			return fmt.Errorf("invalid claimant address: %s", err)
+		}
+	}
+	if strings.TrimSpace(t.Approver) != "" {
+		if _, err := sdk.AccAddressFromBech32(t.Approver); err != nil {
+			return fmt.Errorf("invalid approver address: %s", err)
+		}
+	}
+
+	return nil
+}
+
+func (t Task) CanClaim(claimant string) error {
+	if t.Status != TASK_STATUS_OPEN {
+		return fmt.Errorf("task is not open for claiming")
+	}
+	if t.Creator == claimant {
+		return fmt.Errorf("creator cannot claim their own task")
+	}
+	if strings.TrimSpace(t.Claimant) != "" {
+		return fmt.Errorf("task is already claimed by %s", t.Claimant)
+	}
+
+	return nil
+}
+
+func (t Task) CanSubmit(claimer string) error {
+	if t.Status != TASK_STATUS_CLAIMED {
+		return fmt.Errorf("task is not in claimed status")
+	}
+	if t.Claimant != claimer {
+		return fmt.Errorf("only the current claimant can submit the task")
+	}
+
+	return nil
+}
+
+func (t Task) CanApprove(approver string) error {
+	if t.Status != TASK_STATUS_SUBMITTED {
+		return fmt.Errorf("task is not in submitted status")
+	}
+	if t.Creator != approver {
+		return fmt.Errorf("only the creator can approve the task")
+	}
+
+	return nil
+}
+
+func (t Task) CanReject(rejecter string) error {
+	if t.Status != TASK_STATUS_SUBMITTED {
+		return fmt.Errorf("task is not in submitted status")
+	}
+	if t.Creator != rejecter {
+		return fmt.Errorf("only the creator can reject the task")
+	}
+
+	return nil
+}
+
+func (t Task) IsExpired(params Params, currentTime time.Time) bool {
+	if params.TaskExpiry == 0 {
+		return false
+	}
+
+	expiryTime := time.Unix(t.CreatedAt, 0).Add(time.Duration(params.TaskExpiry) * time.Second)
+	return currentTime.After(expiryTime)
+}
+
+func (t Task) IsClaimExpired(params Params, currentTime time.Time) bool {
+	if params.ClaimDeadline == 0 || t.Claimant == "" {
+		return false
+	}
+	claimTime := time.Unix(t.UpdatedAt, 0)
+	expiryTime := claimTime.Add(time.Duration(params.ClaimDeadline) * time.Second)
+	return currentTime.After(expiryTime)
+}
+
+func (t Task) IsSubmissionExpired(params Params, currentTime time.Time) bool {
+	if params.SubmissionDeadline == 0 || t.Claimant == "" {
+		return false
+	}
+	claimTime := time.Unix(t.UpdatedAt, 0)
+	expiryTime := claimTime.Add(time.Duration(params.SubmissionDeadline) * time.Second)
+	return currentTime.After(expiryTime)
+}
+
+func FilterTasks(tasks []Task, filter TaskFilter) []Task {
+	var filteredTasks []Task
+
+	for _, task := range tasks {
+		if filter.Creator != "" && task.Creator != filter.Creator {
+			continue
+		}
+		if filter.Claimant != "" && task.Claimant != filter.Claimant {
+			continue
+		}
+		if filter.Approver != "" && task.Approver != filter.Approver {
+			continue
+		}
+		if filter.Status != TASK_STATUS_UNDEFINED && task.Status != filter.Status {
+			continue
+		}
+		if !filter.MinBounty.IsZero() && task.Bounty.Amount.LT(filter.MinBounty.Amount) {
+			continue
+		}
+		if !filter.MaxBounty.IsZero() && task.Bounty.Amount.GT(filter.MaxBounty.Amount) {
+			continue
+		}
+
+		filteredTasks = append(filteredTasks, task)
+	}
+
+	return filteredTasks
+}
+
+func SortTasks(tasks []Task, sort TaskSort) []Task {
+	sortedTasks := make([]Task, len(tasks))
+	copy(sortedTasks, tasks)
+
+	switch sort.Field {
+	case "id":
+		if sort.Direction == "desc" {
+			for i := 0; i < len(sortedTasks); i++ {
+				for j := i + 1; j < len(sortedTasks); j++ {
+					if sortedTasks[i].Id < sortedTasks[j].Id {
+						sortedTasks[i], sortedTasks[j] = sortedTasks[j], sortedTasks[i]
+					}
+				}
+			}
+		} else {
+			for i := 0; i < len(sortedTasks); i++ {
+				for j := i + 1; j < len(sortedTasks); j++ {
+					if sortedTasks[i].Id > sortedTasks[j].Id {
+						sortedTasks[i], sortedTasks[j] = sortedTasks[j], sortedTasks[i]
+					}
+				}
+			}
+		}
+	case "bounty":
+		if sort.Direction == "desc" {
+			for i := 0; i < len(sortedTasks); i++ {
+				for j := i + 1; j < len(sortedTasks); j++ {
+					if sortedTasks[i].Bounty.Amount.LT(sortedTasks[j].Bounty.Amount) {
+						sortedTasks[i], sortedTasks[j] = sortedTasks[j], sortedTasks[i]
+					}
+				}
+			}
+		} else {
+			for i := 0; i < len(sortedTasks); i++ {
+				for j := i + 1; j < len(sortedTasks); j++ {
+					if sortedTasks[i].Bounty.Amount.GT(sortedTasks[j].Bounty.Amount) {
+						sortedTasks[i], sortedTasks[j] = sortedTasks[j], sortedTasks[i]
+					}
+				}
+			}
+		}
+	case "status":
+		if sort.Direction == "desc" {
+			for i := 0; i < len(sortedTasks); i++ {
+				for j := i + 1; j < len(sortedTasks); j++ {
+					if sortedTasks[i].Status < sortedTasks[j].Status {
+						sortedTasks[i], sortedTasks[j] = sortedTasks[j], sortedTasks[i]
+					}
+				}
+			}
+		} else {
+			for i := 0; i < len(sortedTasks); i++ {
+				for j := i + 1; j < len(sortedTasks); j++ {
+					if sortedTasks[i].Status > sortedTasks[j].Status {
+						sortedTasks[i], sortedTasks[j] = sortedTasks[j], sortedTasks[i]
+					}
+				}
+			}
+		}
+	case "created_at":
+		if sort.Direction == "desc" {
+			for i := 0; i < len(sortedTasks); i++ {
+				for j := i + 1; j < len(sortedTasks); j++ {
+					if sortedTasks[i].CreatedAt < sortedTasks[j].CreatedAt {
+						sortedTasks[i], sortedTasks[j] = sortedTasks[j], sortedTasks[i]
+					}
+				}
+			}
+		} else {
+			for i := 0; i < len(sortedTasks); i++ {
+				for j := i + 1; j < len(sortedTasks); j++ {
+					if sortedTasks[i].CreatedAt > sortedTasks[j].CreatedAt {
+						sortedTasks[i], sortedTasks[j] = sortedTasks[j], sortedTasks[i]
+					}
+				}
+			}
+		}
+	}
+
+	return sortedTasks
+}
+
+func (p TaskProof) Validate(params Params) error {
+	if strings.TrimSpace(p.Hash) == "" {
+		return fmt.Errorf("proof hash cannot be empty")
+	}
+	if strings.TrimSpace(p.Type) == "" {
+		return fmt.Errorf("proof type cannot be empty")
+	}
+	allowed := false
+	for _, proofType := range params.ProofTypes {
+		if proofType == p.Type {
+			allowed = true
+			break
+		}
+	}
+	if !allowed {
+		return fmt.Errorf("proof type %s is not allowed", p.Type)
+	}
+	if p.Timestamp <= 0 {
+		return fmt.Errorf("proof timestamp must be positive")
+	}
+
+	return nil
+}
+
+func (r TaskReward) Validate() error {
+	if r.TaskId == 0 {
+		return fmt.Errorf("task ID must be positive")
+	}
+	if strings.TrimSpace(r.Claimant) == "" {
+		return fmt.Errorf("claimant cannot be empty")
+	}
+	if _, err := sdk.AccAddressFromBech32(r.Claimant); err != nil {
+		return fmt.Errorf("invalid claimant address: %s", err)
+	}
+	if r.Amount.IsZero() {
+		return fmt.Errorf("reward amount cannot be zero")
+	}
+	if r.Amount.IsNegative() {
+		return fmt.Errorf("reward amount cannot be negative")
+	}
+	if r.Timestamp <= 0 {
+		return fmt.Errorf("reward timestamp must be positive")
+	}
+
+	return nil
+}
+
+func DefaultParams() Params {
+	minBounty := sdk.NewCoin("stake", sdk.NewInt(1000)) // 1000 stake as minimum
+	maxBounty := sdk.NewCoin("stake", sdk.NewInt(1000000)) // 1M stake as maximum
+
+	return Params{
+		MinBounty:             minBounty,
+		MaxBounty:             maxBounty,
+		MaxTitleLength:        100,
+		MaxDescriptionLength:  1000,
+		ProofTypes:            []string{"ipfs", "url", "text"},
+		AutoApproveThreshold:  5,
+		TaskExpiry:            86400 * 30, 
+		ClaimDeadline:         86400 * 7,  
+		SubmissionDeadline:    86400 * 14, 
+	}
+}
+
+func CreateTaskReward(taskId uint64, claimant string, bounty sdk.Coin, txHash string, timestamp int64) TaskReward {
+	return TaskReward{
+		TaskId:    taskId,
+		Claimant:  claimant,
+		Amount:    bounty,
+		Timestamp: timestamp,
+		TxHash:    txHash,
+	}
+}
+
+
