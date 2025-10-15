@@ -8,6 +8,7 @@ import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "taskbounty/task/v1/params.proto";
+import "taskbounty/task/v1/task.proto";
 
 option go_package = "taskbounty/x/task/types";
 
@@ -27,6 +28,12 @@ service Msg {
 
   // DeleteTask defines the DeleteTask RPC.
   rpc DeleteTask(MsgDeleteTask) returns (MsgDeleteTaskResponse);
+  
+  // Custom task management messages
+  rpc ClaimTask(MsgClaimTask) returns (MsgClaimTaskResponse);
+  rpc SubmitTask(MsgSubmitTask) returns (MsgSubmitTaskResponse);
+  rpc ApproveTask(MsgApproveTask) returns (MsgApproveTaskResponse);
+  rpc RejectTask(MsgRejectTask) returns (MsgRejectTaskResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -57,10 +64,6 @@ message MsgCreateTask {
   string title = 2;
   string description = 3;
   cosmos.base.v1beta1.Coin bounty = 4 [(gogoproto.nullable) = false];
-  int64 status = 5;
-  string claimant = 6;
-  string proof = 7;
-  string approver = 8;
 }
 
 // MsgCreateTaskResponse defines the MsgCreateTaskResponse message.
@@ -76,10 +79,6 @@ message MsgUpdateTask {
   string title = 3;
   string description = 4;
   cosmos.base.v1beta1.Coin bounty = 5 [(gogoproto.nullable) = false];
-  int64 status = 6;
-  string claimant = 7;
-  string proof = 8;
-  string approver = 9;
 }
 
 // MsgUpdateTaskResponse defines the MsgUpdateTaskResponse message.
@@ -94,3 +93,46 @@ message MsgDeleteTask {
 
 // MsgDeleteTaskResponse defines the MsgDeleteTaskResponse message.
 message MsgDeleteTaskResponse {}
+
+// MsgClaimTask defines the ClaimTask message.
+message MsgClaimTask {
+  option (cosmos.msg.v1.signer) = "claimant";
+  string claimant = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 2;
+}
+
+// MsgClaimTaskResponse defines the ClaimTaskResponse message.
+message MsgClaimTaskResponse {}
+
+// MsgSubmitTask defines the SubmitTask message.
+message MsgSubmitTask {
+  option (cosmos.msg.v1.signer) = "claimant";
+  string claimant = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 2;
+  TaskProof proof = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgSubmitTaskResponse defines the SubmitTaskResponse message.
+message MsgSubmitTaskResponse {}
+
+// MsgApproveTask defines the ApproveTask message.
+message MsgApproveTask {
+  option (cosmos.msg.v1.signer) = "approver";
+  string approver = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 2;
+  string tx_hash = 3;
+}
+
+// MsgApproveTaskResponse defines the ApproveTaskResponse message.
+message MsgApproveTaskResponse {}
+
+// MsgRejectTask defines the RejectTask message.
+message MsgRejectTask {
+  option (cosmos.msg.v1.signer) = "rejecter";
+  string rejecter = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  uint64 id = 2;
+  string reason = 3;
+}
+
+// MsgRejectTaskResponse defines the RejectTaskResponse message.
+message MsgRejectTaskResponse {}
