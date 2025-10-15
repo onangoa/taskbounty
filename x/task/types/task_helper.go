@@ -410,4 +410,124 @@ func CreateTaskReward(taskId uint64, claimant string, bounty sdk.Coin, txHash st
 	}
 }
 
+func ValidateRewardDistribution(task Task, reward TaskReward) error {
+	if task.Status != TASK_STATUS_APPROVED {
+		return fmt.Errorf("task must be approved to distribute rewards")
+	}
+	if task.Claimant != reward.Claimant {
+		return fmt.Errorf("reward claimant %s does not match task claimant %s", reward.Claimant, task.Claimant)
+	}
+	if task.Id != reward.TaskId {
+		return fmt.Errorf("reward task ID %d does not match task ID %d", reward.TaskId, task.Id)
+	}
+	if !task.Bounty.IsEqual(reward.Amount) {
+		return fmt.Errorf("reward amount %s does not match task bounty %s", reward.Amount.String(), task.Bounty.String())
+	}
+	if err := reward.Validate(); err != nil {
+		return fmt.Errorf("invalid reward: %s", err)
+	}
 
+	return nil
+}
+
+func CalculateRewardAmount(task Task, params Params, performanceScore float64) sdk.Coin {
+	if performanceScore < 0.0 {
+		performanceScore = 0.0
+	} else if performanceScore > 1.0 {
+		performanceScore = 1.0
+	}
+	baseReward := sdk.NewDecFromInt(task.Bounty.Amount).Mul(sdk.NewDec(performanceScore))
+	rewardAmount := baseReward.TruncateInt()
+	if rewardAmount.GT(task.Bounty.Amount) {
+		rewardAmount = task.Bounty.Amount
+	}
+	if performanceScore >= 0.5 && rewardAmount.LT(params.MinBounty.Amount) {
+		rewardAmount = params.MinBounty.Amount
+	}
+
+	return sdk.NewCoin(task.Bounty.Denom, rewardAmount)
+}
+
+func SplitTaskReward(reward TaskReward, recipients []string, weights []sdk.Int) []TaskReward {
+	if len(recipients) != len(weights) {
+		return nil
+	}
+
+	var rewards []TaskReward
+	totalWeight := sdk.NewInt(0)
+
+	// total weight
+	for _, weight := range weights {
+		totalWeight = totalWeight.Add(weight)
+	}
+
+	// rewards for each recipient
+	for i, recipient := range recipients {
+		if totalWeight.IsZero() {
+			continue
+		}
+		portion := sdk.NewDecFromInt(weights[i]).Quo(sdk.NewDecFromInt(totalWeight))
+		amount := sdk.NewDecFromInt(reward.Amount.Amount).Mul(portion).TruncateInt()
+		if amount.IsZero() {
+			continue
+		}
+
+		rewards = append(rewards, TaskReward{
+			TaskId:    reward.TaskId,
+			Claimant:  recipient,
+			Amount:    sdk.NewCoin(reward.Amount.Denom, amount),
+			Timestamp: reward.Timestamp,
+			TxHash:    reward.TxHash,
+		})
+	}
+
+	return rewards
+}
+
+func CheckAutoApproval(task Task, params Params, proof TaskProof, approvals uint32) bool {
+	if params.AutoApproveThreshold == 0 {
+		return false
+	}
+	if task.Status != TASK_STATUS_SUBMITTED {
+		return false
+	}
+	if err := proof.Validate(params); err != nil {
+		return false
+	}
+	return approvals >= params.AutoApproveThreshold
+}
+
+func EstimateTaskCompletionTime(task Task, params Params) time.Duration {
+	bountyRatio := sdk.NewDecFromInt(task.Bounty.Amount).Quo(sdk.NewDecFromInt(params.MaxBounty.Amount))
+	baseHours := 100.0
+	estimatedHours := baseHours / bountyRatio.MustFloat64()
+	if estimatedHours > 1000.0 {
+		estimatedHours = 1000.0
+	}
+	
+	return time.Duration(estimatedHours) * time.Hour
+}
+
+func GetTaskProgress(task Task) float64 {
+	switch task.Status {
+	case TASK_STATUS_UNDEFINED:
+		return 0.0
+	case TASK_STATUS_OPEN:
+		return 0.0
+	case TASK_STATUS_CLAIMED:
+		return 0.25
+	case TASK_STATUS_SUBMITTED:
+		return 0.75
+	case TASK_STATUS_APPROVED:
+		return 1.0
+	case TASK_STATUS_REJECTED:
+		return 0.5
+	case TASK_STATUS_CLOSED:
+		if task.Claimant != "" {
+			return 1.0
+		}
+		return 0.0
+	default:
+		return 0.0
+	}
+}
