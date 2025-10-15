@@ -72,3 +72,4 @@ func (q queryServer) GetTaskRewardsByClaimant(ctx context.Context, req *types.Qu
 	}
 
 	return &types.QueryGetTaskRewardsByClaimantResponse{TaskRewards: rewards}, nil
+}
