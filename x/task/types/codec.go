@@ -11,6 +11,10 @@ func RegisterInterfaces(registrar codectypes.InterfaceRegistry) {
 		&MsgCreateTask{},
 		&MsgUpdateTask{},
 		&MsgDeleteTask{},
+		&MsgClaimTask{},
+		&MsgSubmitTask{},
+		&MsgApproveTask{},
+		&MsgRejectTask{},
 	)
 
 	registrar.RegisterImplementations((*sdk.Msg)(nil),
