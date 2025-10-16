@@ -78,6 +78,7 @@ func queryCommand() *cobra.Command {
 		server.QueryBlocksCmd(),
 		authcmd.QueryTxCmd(),
 		server.QueryBlockResultsCmd(),
+		GetTaskQueryCmd(),
 	)
 
 	return cmd
@@ -103,6 +104,7 @@ func txCommand() *cobra.Command {
 		authcmd.GetEncodeCommand(),
 		authcmd.GetDecodeCommand(),
 		authcmd.GetSimulateCmd(),
+		GetTaskTxCmd(),
 	)
 
 	return cmd
