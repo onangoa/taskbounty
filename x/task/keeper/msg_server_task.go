@@ -9,6 +9,7 @@ import (
 
 	"cosmossdk.io/collections"
 	errorsmod "cosmossdk.io/errors"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
@@ -29,7 +30,8 @@ func (k msgServer) CreateTask(ctx context.Context, msg *types.MsgCreateTask) (*t
 	}
 
 	// Get current timestamp
-	currentTime := sdk.UnixContext(ctx).Unix()
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	currentTime := sdkCtx.BlockTime().Unix()
 
 	var task = types.Task{
 		Id:          nextId,
@@ -90,7 +92,8 @@ func (k msgServer) UpdateTask(ctx context.Context, msg *types.MsgUpdateTask) (*t
 	}
 
 	// Get current timestamp
-	currentTime := sdk.UnixContext(ctx).Unix()
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	currentTime := sdkCtx.BlockTime().Unix()
 
 	// Create updated task with new values
 	task := types.Task{

@@ -31,7 +31,7 @@ func (q queryServer) GetTaskReward(ctx context.Context, req *types.QueryGetTaskR
 	return &types.QueryGetTaskRewardResponse{TaskReward: reward}, nil
 }
 
-func (q queryServer) ListTaskRewards(ctx context.Context, req *types.QueryAllTaskRewardRequest) (*types.QueryAllTaskRewardResponse, error) {
+func (q queryServer) ListTaskReward(ctx context.Context, req *types.QueryAllTaskRewardRequest) (*types.QueryAllTaskRewardResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}

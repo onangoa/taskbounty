@@ -5,6 +5,7 @@ import (
 "strings"
 "time"
 
+"cosmossdk.io/math"
 sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -384,8 +385,8 @@ func (r TaskReward) Validate() error {
 }
 
 func DefaultParams() Params {
-	minBounty := sdk.NewCoin("stake", sdk.NewInt(1000)) // 1000 stake as minimum
-	maxBounty := sdk.NewCoin("stake", sdk.NewInt(1000000)) // 1M stake as maximum
+	minBounty := sdk.NewCoin("stake", math.NewInt(1000)) // 1000 stake as minimum
+	maxBounty := sdk.NewCoin("stake", math.NewInt(1000000)) // 1M stake as maximum
 
 	return Params{
 		MinBounty:             minBounty,
@@ -436,7 +437,7 @@ func CalculateRewardAmount(task Task, params Params, performanceScore float64) s
 	} else if performanceScore > 1.0 {
 		performanceScore = 1.0
 	}
-	baseReward := sdk.NewDecFromInt(task.Bounty.Amount).Mul(sdk.NewDec(performanceScore))
+	baseReward := math.LegacyNewDecFromInt(task.Bounty.Amount).Mul(math.LegacyMustNewDecFromStr(fmt.Sprintf("%f", performanceScore)))
 	rewardAmount := baseReward.TruncateInt()
 	if rewardAmount.GT(task.Bounty.Amount) {
 		rewardAmount = task.Bounty.Amount
@@ -448,13 +449,13 @@ func CalculateRewardAmount(task Task, params Params, performanceScore float64) s
 	return sdk.NewCoin(task.Bounty.Denom, rewardAmount)
 }
 
-func SplitTaskReward(reward TaskReward, recipients []string, weights []sdk.Int) []TaskReward {
+func SplitTaskReward(reward TaskReward, recipients []string, weights []math.Int) []TaskReward {
 	if len(recipients) != len(weights) {
 		return nil
 	}
 
 	var rewards []TaskReward
-	totalWeight := sdk.NewInt(0)
+	totalWeight := math.NewInt(0)
 
 	// total weight
 	for _, weight := range weights {
@@ -466,8 +467,8 @@ func SplitTaskReward(reward TaskReward, recipients []string, weights []sdk.Int) 
 		if totalWeight.IsZero() {
 			continue
 		}
-		portion := sdk.NewDecFromInt(weights[i]).Quo(sdk.NewDecFromInt(totalWeight))
-		amount := sdk.NewDecFromInt(reward.Amount.Amount).Mul(portion).TruncateInt()
+		portion := math.LegacyNewDecFromInt(weights[i]).Quo(math.LegacyNewDecFromInt(totalWeight))
+		amount := math.LegacyNewDecFromInt(reward.Amount.Amount).Mul(portion).TruncateInt()
 		if amount.IsZero() {
 			continue
 		}
@@ -498,7 +499,7 @@ func CheckAutoApproval(task Task, params Params, proof TaskProof, approvals uint
 }
 
 func EstimateTaskCompletionTime(task Task, params Params) time.Duration {
-	bountyRatio := sdk.NewDecFromInt(task.Bounty.Amount).Quo(sdk.NewDecFromInt(params.MaxBounty.Amount))
+	bountyRatio := math.LegacyNewDecFromInt(task.Bounty.Amount).Quo(math.LegacyNewDecFromInt(params.MaxBounty.Amount))
 	baseHours := 100.0
 	estimatedHours := baseHours / bountyRatio.MustFloat64()
 	if estimatedHours > 1000.0 {

@@ -3,14 +3,15 @@ package types
 import (
 	"fmt"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // NewParams creates a new Params instance.
 func NewParams() Params {
 	return Params{
-		MinBounty:             sdk.NewCoin("stake", sdk.NewInt(1000)),
-		MaxBounty:             sdk.NewCoin("stake", sdk.NewInt(1000000)),
+		MinBounty:             sdk.NewCoin("stake", math.NewInt(1000)),
+		MaxBounty:             sdk.NewCoin("stake", math.NewInt(1000000)),
 		MaxTitleLength:        100,
 		MaxDescriptionLength:  1000,
 		ProofTypes:            []string{"ipfs", "url", "text"},

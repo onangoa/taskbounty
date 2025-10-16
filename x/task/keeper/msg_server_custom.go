@@ -2,6 +2,7 @@ package keeper
 
 import (
 "context"
+"errors"
 "fmt"
 "time"
 
@@ -36,7 +37,8 @@ if err != nil {
 	return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "failed to get params")
 }
 
-currentTime := sdk.UnixContext(ctx).Unix()
+sdkCtx := sdk.UnwrapSDKContext(ctx)
+currentTime := sdkCtx.BlockTime().Unix()
 if task.IsExpired(params, time.Unix(currentTime, 0)) {
 	return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "task has expired")
 }
@@ -79,7 +81,8 @@ if err := msg.Proof.Validate(params); err != nil {
 	return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, err.Error())
 }
 
-currentTime := sdk.UnixContext(ctx).Unix()
+sdkCtx := sdk.UnwrapSDKContext(ctx)
+currentTime := sdkCtx.BlockTime().Unix()
 if task.IsClaimExpired(params, time.Unix(currentTime, 0)) {
 	return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "task claim has expired")
 }
@@ -120,7 +123,8 @@ params, err := k.Params.Get(ctx)
 if err != nil {
 	return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "failed to get params")
 }
-currentTime := sdk.UnixContext(ctx).Unix()
+sdkCtx := sdk.UnwrapSDKContext(ctx)
+currentTime := sdkCtx.BlockTime().Unix()
 if task.IsSubmissionExpired(params, time.Unix(currentTime, 0)) {
 	return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "task submission has expired")
 }
@@ -163,7 +167,8 @@ params, err := k.Params.Get(ctx)
 if err != nil {
 	return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "failed to get params")
 }
-currentTime := sdk.UnixContext(ctx).Unix()
+sdkCtx := sdk.UnwrapSDKContext(ctx)
+currentTime := sdkCtx.BlockTime().Unix()
 if task.IsSubmissionExpired(params, time.Unix(currentTime, 0)) {
 	return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "task submission has expired")
 }
