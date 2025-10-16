@@ -64,6 +64,10 @@ message MsgCreateTask {
   string title = 2;
   string description = 3;
   cosmos.base.v1beta1.Coin bounty = 4 [(gogoproto.nullable) = false];
+  TaskStatus status = 5;
+  string claimant = 6 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  TaskProof proof = 7 [(gogoproto.nullable) = false];
+  string approver = 8 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
 // MsgCreateTaskResponse defines the MsgCreateTaskResponse message.
@@ -79,6 +83,10 @@ message MsgUpdateTask {
   string title = 3;
   string description = 4;
   cosmos.base.v1beta1.Coin bounty = 5 [(gogoproto.nullable) = false];
+  TaskStatus status = 6;
+  string claimant = 7 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  TaskProof proof = 8 [(gogoproto.nullable) = false];
+  string approver = 9 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
 // MsgUpdateTaskResponse defines the MsgUpdateTaskResponse message.
