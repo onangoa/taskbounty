@@ -1,16 +1,16 @@
 package rest
 
 import (
-"context"
-"encoding/json"
-"fmt"
-"net/http"
-"strings"
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"strings"
 
-"github.com/cosmos/cosmos-sdk/client"
-"github.com/gorilla/mux"
-
-"taskbounty/x/task/types"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/gorilla/mux"
+	
+	"taskbounty/x/task/types"
 )
 
 // RegisterRoutes registers the REST routes for the task module.
@@ -51,6 +51,7 @@ func queryParamsHandler(clientCtx client.Context) http.HandlerFunc {
 
 		PostProcessResponse(w, clientCtx, res)
 	}
+}
 
 // listTaskHandler returns a list of all tasks
 func listTaskHandler(clientCtx client.Context) http.HandlerFunc {
@@ -63,6 +64,7 @@ func listTaskHandler(clientCtx client.Context) http.HandlerFunc {
 
 		PostProcessResponse(w, clientCtx, res)
 	}
+}
 
 // getTaskHandler returns a specific task
 func getTaskHandler(clientCtx client.Context) http.HandlerFunc {
@@ -137,7 +139,7 @@ func createTaskHandler(clientCtx client.Context) http.HandlerFunc {
 		}
 
 		msg := types.NewMsgCreateTask(req.Creator, req.Title, req.Description, req.Bounty)
-		txWrite := rest.TxResponseGenerator{
+		txWrite := TxResponseGenerator{
 			ClientCtx: clientCtx,
 			TxBuilder: clientCtx.TxConfig.NewTxBuilder(),
 		}
@@ -177,7 +179,7 @@ func updateTaskHandler(clientCtx client.Context) http.HandlerFunc {
 		req.Id = taskID
 
 		msg := types.NewMsgUpdateTask(req.Creator, req.Id, req.Title, req.Description, req.Bounty)
-		txWrite := rest.TxResponseGenerator{
+		txWrite := TxResponseGenerator{
 			ClientCtx: clientCtx,
 			TxBuilder: clientCtx.TxConfig.NewTxBuilder(),
 		}
@@ -217,7 +219,7 @@ func deleteTaskHandler(clientCtx client.Context) http.HandlerFunc {
 		req.Id = taskID
 
 		msg := types.NewMsgDeleteTask(req.Creator, req.Id)
-		txWrite := rest.TxResponseGenerator{
+		txWrite := TxResponseGenerator{
 			ClientCtx: clientCtx,
 			TxBuilder: clientCtx.TxConfig.NewTxBuilder(),
 		}
@@ -257,7 +259,7 @@ func claimTaskHandler(clientCtx client.Context) http.HandlerFunc {
 		req.Id = taskID
 
 		msg := types.NewMsgClaimTask(req.Claimant, req.Id)
-		txWrite := rest.TxResponseGenerator{
+		txWrite := TxResponseGenerator{
 			ClientCtx: clientCtx,
 			TxBuilder: clientCtx.TxConfig.NewTxBuilder(),
 		}
@@ -297,7 +299,7 @@ func submitTaskHandler(clientCtx client.Context) http.HandlerFunc {
 		req.Id = taskID
 
 		msg := types.NewMsgSubmitTask(req.Claimant, req.Id, req.Proof)
-		txWrite := rest.TxResponseGenerator{
+		txWrite := TxResponseGenerator{
 			ClientCtx: clientCtx,
 			TxBuilder: clientCtx.TxConfig.NewTxBuilder(),
 		}
@@ -337,7 +339,7 @@ func approveTaskHandler(clientCtx client.Context) http.HandlerFunc {
 		req.Id = taskID
 
 		msg := types.NewMsgApproveTask(req.Approver, req.Id, req.TxHash)
-		txWrite := rest.TxResponseGenerator{
+		txWrite := TxResponseGenerator{
 			ClientCtx: clientCtx,
 			TxBuilder: clientCtx.TxConfig.NewTxBuilder(),
 		}
@@ -377,7 +379,7 @@ func rejectTaskHandler(clientCtx client.Context) http.HandlerFunc {
 		req.Id = taskID
 
 		msg := types.NewMsgRejectTask(req.Rejecter, req.Id, req.Reason)
-		txWrite := rest.TxResponseGenerator{
+		txWrite := TxResponseGenerator{
 			ClientCtx: clientCtx,
 			TxBuilder: clientCtx.TxConfig.NewTxBuilder(),
 		}
