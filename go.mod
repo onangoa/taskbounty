@@ -1,6 +1,6 @@
 module taskbounty
 
-go 1.24.0
+go 1.25.0
 
 replace (
 	// fix upstream GHSA-h395-qcrw-5vmq vulnerability.
