@@ -1,0 +1,52 @@
+# Git
+.git
+.github
+.gitignore
+
+# Build artifacts
+build/
+dist/
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+taskbountyd
+
+# Test files
+**/*_test.go
+**/test/
+**/tests/
+testutil/
+
+# Development and IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Documentation
+docs/
+*.md
+LICENSE
+
+# Docker files (not needed in build context)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Temporary files
+tmp/
+temp/
+
+# Log files
+*.log
+
+# Node data (if any exists in repo)
+.taskbounty/

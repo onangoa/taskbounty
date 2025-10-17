@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  taskbounty:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: taskbounty:latest
+    container_name: taskbounty-node
+    volumes:
+      - taskbounty-data:/root/.taskbounty
+      - ./config.yml:/app/config.yml:ro
+    ports:
+      - "26656:26656" # P2P
+      - "26657:26657" # RPC
+      - "1317:1317"   # REST API
+      - "9090:9090"   # gRPC
+    command: ["start", "--home", "/root/.taskbounty"]
+    restart: unless-stopped
+    environment:
+      - TASKBOUNTY_LOG_LEVEL=info
+    networks:
+      - taskbounty-network
+
+networks:
+  taskbounty-network:
+    driver: bridge
+
+volumes:
+  taskbounty-data:
+    driver: local
