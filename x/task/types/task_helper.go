@@ -362,9 +362,6 @@ func (p TaskProof) Validate(params Params) error {
 }
 
 func (r TaskReward) Validate() error {
-	if r.TaskId == 0 {
-		return fmt.Errorf("task ID must be positive")
-	}
 	if strings.TrimSpace(r.Claimant) == "" {
 		return fmt.Errorf("claimant cannot be empty")
 	}
