@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -13,6 +14,7 @@ import (
 
 	"taskbounty/x/task/types"
 )
+
 
 // GetTxCmd returns the transaction commands for the task module
 func GetTaskTxCmd() *cobra.Command {
@@ -201,9 +203,9 @@ func GetCmdClaimTask() *cobra.Command {
 // GetCmdSubmitTask implements the submit task command handler
 func GetCmdSubmitTask() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "submit [id] [proof-type] [proof-data]",
+		Use:   "submit [id] [proof-hash] [proof-type] [proof-data]",
 		Short: "Submit a completed task with proof",
-		Args:  cobra.ExactArgs(3),
+		Args:  cobra.ExactArgs(4),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
@@ -215,14 +217,15 @@ func GetCmdSubmitTask() *cobra.Command {
 				return fmt.Errorf("invalid task id: %v", err)
 			}
 
-			proofType := args[1]
-			proofData := args[2]
+			proofHash := args[1]
+			proofType := args[2]
+			proofData := args[3]
 
-			// Create a TaskProof
 			proof := types.TaskProof{
+				Hash:      proofHash,
 				Type:      proofType,
 				Data:      proofData,
-				Timestamp: 0, // Will be set by the server
+				Timestamp: time.Now().Unix(), // Set current timestamp
 			}
 
 			msg := types.NewMsgSubmitTask(
@@ -238,6 +241,7 @@ func GetCmdSubmitTask() *cobra.Command {
 	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
+
 
 // GetCmdApproveTask implements the approve task command handler
 func GetCmdApproveTask() *cobra.Command {
